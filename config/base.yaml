@@ -1,0 +1,36 @@
+codec:
+  trainable: False
+  path: /DKUdata/tangbl/FunCodec/funcodec/bin
+  model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/model.pth
+  config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/config.yaml
+  bypass_quantizer: True
+
+model:
+  num: 6
+  d_model: 128
+  d_state: 16
+  d_conv: 4
+  expand: 2
+  sample_rate: 8000
+  
+data:
+  name: WHAM # have to be in [WHAM, ]
+  tr: 
+    mix: /DKUdata/tangbl/MambaCodec/data/wham/tr/mix.scp
+    source: /DKUdata/tangbl/MambaCodec/data/wham/tr/s.scp
+  cv:
+    mix: /DKUdata/tangbl/MambaCodec/data/wham/cv/mix.scp
+    source: /DKUdata/tangbl/MambaCodec/data/wham/cv/s.scp
+  tt:
+    mix: /DKUdata/tangbl/MambaCodec/data/wham/tt/mix.scp
+    source: /DKUdata/tangbl/MambaCodec/data/wham/tt/s.scp
+
+batch_size: 16
+epoch: 100
+
+
+optmizer: 
+  type: Adam
+  args:
+    lr: 0.001
+    weight_decay: 0
