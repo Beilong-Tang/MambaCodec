@@ -89,7 +89,7 @@ class Trainer():
     
     def train(self):
         loss_fn = nn.MSELoss()
-        for epoch in range(self.epoch_start, config['epoch']):
+        for epoch in range(self.epoch_start, self.config['epoch']):
             logger.info(f"...epoch {epoch}...")
             ### training 
             self._train(loss_fn, self.optim, self.tr_data, epoch)
