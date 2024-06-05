@@ -89,19 +89,6 @@ class Trainer():
                 logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(size*len(X)):>5d}], time: {(time.now() - start_time)*1000 :.2d}ms")
         pass
     
-    def _eval(self, loss_fn, cv_data, epoch):
-                true_audio = self.model.decode(true_y)
-                mse_loss = loss_fn(output_y, true_y).item()
-                si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
-                si_snr_loss_total += si_snr_loss
-                mse_loss_total += mse_loss
-        mse_loss_avg= mse_loss_total / len(cv_data)
-        si_snr_loss_avg = si_snr_loss_total / len(cv_data)
-        logger.info(f"epoch {epoch}, cv mse loss: {(mse_loss_avg) :>7f}, si_snr loss: {(si_snr_loss_total) :>7f}")
-        loss_dict['mse'] = mse_loss_avg
-        loss_dict['si_snr'] = si_snr_loss_avg
-        self.cv_loss[epoch] = loss_dict
-    
     def train():
         loss_fn = nn.MSELoss()
         for epoch in range(self.epoch_start, config['epoch']):
