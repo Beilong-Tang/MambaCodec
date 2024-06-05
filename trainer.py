@@ -44,7 +44,7 @@ class Trainer():
     
     def _train(self, loss_fn, optim, tr_data, epoch):
         self.model.train()
-        start_time = time.now()
+        start_time = time.time()
         for batch, (mix_audio, clean_audio) in enumerate(tr_data):
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             with torch.no_grad():
@@ -58,8 +58,8 @@ class Trainer():
             self.tr_loss[epoch] = loss.item()
             if batch * mix_audio.size(0) % self.log_interval == 0:
                 loss, current = loss.item(), (batch + 1) * len(mix_audio)
-                logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.now() - start_time)*1000 :.2d}ms")
-                start_time = time.now()
+                logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2d}ms")
+                start_time = time.time()
         pass
     
     def _eval(self, loss_fn, cv_data, epoch):
