@@ -1,4 +1,5 @@
 import torchaudio
+import torch
 from torch.utils.data import Dataset
 
 
@@ -49,5 +50,6 @@ def load_wham_dataset(config):
     """
     tr_path = config['data']['tr']
     cv_path = config['data']['cv']
-    return WhamDataset(tr_path['mix'], tr_path['source']), WhamDataset(cv_path['mix'], cv_path['source'])
+    return (WhamDataset(tr_path['mix'], tr_path['source'], config['data']['length']),
+            WhamDataset(cv_path['mix'], cv_path['source'], config['data']['length']))
 

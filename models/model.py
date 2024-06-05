@@ -1,5 +1,7 @@
 import torch.nn as nn
 import sys 
+import logging 
+logger = logging.getLogger(__name__)
 
 ### add funcodec path
 sys.path.append("/DKUdata/tangbl/FunCodec/funcodec/bin")
@@ -34,7 +36,8 @@ class MambaCodec(nn.Module):
             d_conv=d_conv,    # Local convolution width
             expand=expand,    # Block expansion factor
             ).to(device)
-
+        mamba_param_num = sum(p.numel() for p in self.mambaModel.parameters())
+        logger.info(f"mamba parameters {mamba_param_num}")
     
     def encode(self, x):
         """

@@ -53,6 +53,7 @@ class Trainer():
                 true_y = self.model.mamba(true_emb)
             output_y = self.model.mamba(input_emb)
             loss = loss_fn(output_y, true_y)
+            loss.backward()
             optim.step()
             optim.zero_grad()
             self.tr_loss[epoch] = loss.item()
