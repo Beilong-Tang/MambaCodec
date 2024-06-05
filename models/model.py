@@ -13,15 +13,16 @@ class MambaCodec(nn.Module):
     def __init__(self, 
                 config_path, 
                 model_path, 
+                d_model,
+                d_state,
+                d_conv,
+                expand,
                 emb_dim = 128, 
                 device = "cpu", 
                 bypass_quantizer = True, 
                 sampling_rate = 8000,
                 mamba_num,
-                d_model,
-                d_state,
-                d_conv,
-                expand,
+                
                 **kwargs
                 ):
         super().__init__()
