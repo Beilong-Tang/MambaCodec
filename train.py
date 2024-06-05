@@ -13,11 +13,15 @@ logger = logging.getLogger(__name__)
 ###
 
 from utils import get_instance
+from trainer import Trainer
 
 def main(args):
-
-
+    ### prepare dataset
     
+
+    ### prepare model
+
+    ### start training loop
     pass
 
 if __name__ =="__main__":
@@ -27,7 +31,7 @@ if __name__ =="__main__":
     parser.add_argument("--ddp", action = "store_true")
     parser.add_argument("--gpus", type = str, default = "4,5,6,7", required = True)
     parser.add_argument("--name", type = str, default = "base", required = True)
-    parser.add_argument("--keep_ckpt", action = "store_true")
+    parser.add_argument("--ckpt_path", type = str, required = True)
     args = parser.parse_args()
     main(args)
     pass

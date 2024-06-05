@@ -1,4 +1,9 @@
 import torch.nn as nn
+import sys 
+
+### add funcodec path
+sys.path.append("/DKUdata/tangbl/FunCodec/funcodec/bin")
+### 
 
 from codec_inference import Speech2Token
 from mamba_ssm import Mamba
