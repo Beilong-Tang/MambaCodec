@@ -45,7 +45,7 @@ if __name__ =="__main__":
     parser.add_argument("--continue_from", type = str )
     parser.add_argument("--ddp", action = "store_true")
     parser.add_argument("--gpus", type = str, default = "4,5,6,7")
-    parser.add_argument("--device", type = str, default = "cuda:4")
+    parser.add_argument("--device", type = str, default = "cuda:5")
     parser.add_argument("--name", type = str, required = True)
     parser.add_argument("--ckpt_path", type = str, required = True)
     args = parser.parse_args()
