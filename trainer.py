@@ -21,7 +21,6 @@ class Trainer():
         self.cv_loss = {}
         self.optim = optim
         self.device = device
-        self.train_codec = config['codec']['trainable']
         self.log_interval = config['log_interval']
         os.makedirs(os.path.join(self.ckpt_path, self.name), exist_ok = True)
         if not args.continue_from ==None:

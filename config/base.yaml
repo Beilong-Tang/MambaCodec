@@ -1,5 +1,4 @@
 codec:
-  path: /DKUdata/tangbl/FunCodec/funcodec/bin
   model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/model.pth
   config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/config.yaml
   bypass_quantizer: True
@@ -24,6 +23,12 @@ data:
     mix: /DKUdata/tangbl/MambaCodec/data/wham/tt/mix.scp
     source: /DKUdata/tangbl/MambaCodec/data/wham/tt/s.scp
 
-batch_size: 16
+batch_size: 2
 epoch: 100
 log_interval: 100
+
+optim:
+  type: Adam
+  args:
+    lr: 0.001
+    weight_decay: 0
