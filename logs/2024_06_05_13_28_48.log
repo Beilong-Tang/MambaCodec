@@ -1,0 +1,413 @@
+2024-06-05 13:29:01,__main__,INFO,train.py --config_path /DKUdata/tangbl/MambaCodec/config/base.yaml --name base --ckpt_path /DKUdata/tangbl/MambaCodec/ckpt
+2024-06-05 13:29:02,root,INFO,Using distributed residual vector quantization.
+2024-06-05 13:29:08,root,INFO,model: Encodec(
+  (encoder): SEANetEncoder(
+    (model): Sequential(
+      (0): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(1, 32, kernel_size=(7,), stride=(1,))
+          (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+        )
+      )
+      (1): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(32, 16, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 16, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(16, 32, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(32, 32, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (2): ELU(alpha=1.0)
+      (3): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(32, 64, kernel_size=(4,), stride=(2,))
+          (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+        )
+      )
+      (4): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(64, 32, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(32, 64, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(64, 64, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (5): ELU(alpha=1.0)
+      (6): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(64, 128, kernel_size=(4,), stride=(2,))
+          (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+        )
+      )
+      (7): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(128, 64, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(64, 128, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(128, 128, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (8): ELU(alpha=1.0)
+      (9): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(128, 256, kernel_size=(8,), stride=(4,))
+          (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+        )
+      )
+      (10): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(256, 128, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(128, 256, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (11): ELU(alpha=1.0)
+      (12): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(256, 512, kernel_size=(10,), stride=(5,))
+          (norm): GroupNorm(1, 512, eps=1e-05, affine=True)
+        )
+      )
+      (13): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(512, 256, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(256, 512, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 512, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(512, 512, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 512, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (14): ELU(alpha=1.0)
+      (15): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(512, 1024, kernel_size=(16,), stride=(8,))
+          (norm): GroupNorm(1, 1024, eps=1e-05, affine=True)
+        )
+      )
+      (16): SLSTM(
+        (lstm): LSTM(1024, 1024, num_layers=2)
+      )
+      (17): ELU(alpha=1.0)
+      (18): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(1024, 128, kernel_size=(7,), stride=(1,))
+          (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+        )
+      )
+    )
+  )
+  (quantizer): CostumeQuantizer(
+    (rq): ResidualVectorQuantizer(
+      (model): DistributedResidualVectorQuantization(
+        (layers): ModuleList(
+          (0-31): 32 x VectorQuantization(
+            (project_in): Identity()
+            (project_out): Identity()
+            (_codebook): EuclideanCodebook()
+          )
+        )
+      )
+    )
+  )
+  (decoder): SEANetDecoder(
+    (model): Sequential(
+      (0): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(128, 1024, kernel_size=(7,), stride=(1,))
+          (norm): GroupNorm(1, 1024, eps=1e-05, affine=True)
+        )
+      )
+      (1): SLSTM(
+        (lstm): LSTM(1024, 1024, num_layers=2)
+      )
+      (2): ELU(alpha=1.0)
+      (3): SConvTranspose1d(
+        (convtr): NormConvTranspose1d(
+          (convtr): ConvTranspose1d(1024, 512, kernel_size=(16,), stride=(8,))
+          (norm): GroupNorm(1, 512, eps=1e-05, affine=True)
+        )
+      )
+      (4): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(512, 256, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(256, 512, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 512, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(512, 512, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 512, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (5): ELU(alpha=1.0)
+      (6): SConvTranspose1d(
+        (convtr): NormConvTranspose1d(
+          (convtr): ConvTranspose1d(512, 256, kernel_size=(10,), stride=(5,))
+          (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+        )
+      )
+      (7): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(256, 128, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(128, 256, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(256, 256, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 256, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (8): ELU(alpha=1.0)
+      (9): SConvTranspose1d(
+        (convtr): NormConvTranspose1d(
+          (convtr): ConvTranspose1d(256, 128, kernel_size=(8,), stride=(4,))
+          (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+        )
+      )
+      (10): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(128, 64, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(64, 128, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(128, 128, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 128, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (11): ELU(alpha=1.0)
+      (12): SConvTranspose1d(
+        (convtr): NormConvTranspose1d(
+          (convtr): ConvTranspose1d(128, 64, kernel_size=(4,), stride=(2,))
+          (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+        )
+      )
+      (13): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(64, 32, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(32, 64, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(64, 64, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 64, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (14): ELU(alpha=1.0)
+      (15): SConvTranspose1d(
+        (convtr): NormConvTranspose1d(
+          (convtr): ConvTranspose1d(64, 32, kernel_size=(4,), stride=(2,))
+          (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+        )
+      )
+      (16): SEANetResnetBlock(
+        (block): Sequential(
+          (0): ELU(alpha=1.0)
+          (1): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(32, 16, kernel_size=(3,), stride=(1,))
+              (norm): GroupNorm(1, 16, eps=1e-05, affine=True)
+            )
+          )
+          (2): ELU(alpha=1.0)
+          (3): SConv1d(
+            (conv): NormConv1d(
+              (conv): Conv1d(16, 32, kernel_size=(1,), stride=(1,))
+              (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+            )
+          )
+        )
+        (shortcut): SConv1d(
+          (conv): NormConv1d(
+            (conv): Conv1d(32, 32, kernel_size=(1,), stride=(1,))
+            (norm): GroupNorm(1, 32, eps=1e-05, affine=True)
+          )
+        )
+      )
+      (17): ELU(alpha=1.0)
+      (18): SConv1d(
+        (conv): NormConv1d(
+          (conv): Conv1d(32, 1, kernel_size=(7,), stride=(1,))
+          (norm): GroupNorm(1, 1, eps=1e-05, affine=True)
+        )
+      )
+    )
+  )
+  (discriminator): MultipleDiscriminator(
+    (discriminators): ModuleList(
+      (0): MultiScaleSTFTDiscriminator(
+        (discriminators): ModuleList(
+          (0-2): 3 x DiscriminatorSTFT(
+            (activation): LeakyReLU(negative_slope=0.2)
+            (spec_transform): Spectrogram()
+            (convs): ModuleList(
+              (0): NormConv2d(
+                (conv): Conv2d(2, 32, kernel_size=(3, 9), stride=(1, 1), padding=(1, 4))
+                (norm): Identity()
+              )
+              (1): NormConv2d(
+                (conv): Conv2d(32, 32, kernel_size=(3, 9), stride=(1, 2), padding=(1, 4))
+                (norm): Identity()
+              )
+              (2): NormConv2d(
+                (conv): Conv2d(32, 32, kernel_size=(3, 9), stride=(1, 2), padding=(2, 4), dilation=(2, 1))
+                (norm): Identity()
+              )
+              (3): NormConv2d(
+                (conv): Conv2d(32, 32, kernel_size=(3, 9), stride=(1, 2), padding=(4, 4), dilation=(4, 1))
+                (norm): Identity()
+              )
+              (4): NormConv2d(
+                (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (norm): Identity()
+              )
+            )
+            (conv_post): NormConv2d(
+              (conv): Conv2d(32, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (norm): Identity()
+            )
+          )
+        )
+        (downsample): AvgPool2d(kernel_size=4, stride=2, padding=1)
+      )
+    )
+  )
+  (mel_spec_transforms): ModuleList(
+    (0-5): 6 x Audio2Mel()
+  )
+)
+2024-06-05 13:29:08,root,INFO,model parameter number: 66457385
+2024-06-05 13:29:08,root,INFO,model arguments: Namespace(config='conf/encodec_lstm_16k_n32_600k_step_rmseg_use_power_ds640.yaml', print_config=False, log_level='INFO', dry_run=False, iterator_type='sequence', output_dir='exp/encodec_lstm_16k_n32_600k_step_rmseg_use_power_ds640_raw_en_inhouse_open', ngpu=4, seed=0, num_workers=8, num_att_plot=0, dist_backend='nccl', dist_init_method='env://', dist_world_size=None, dist_rank=None, local_rank=0, dist_master_addr=None, dist_master_port=None, dist_launcher=None, multiprocessing_distributed=True, unused_parameters=True, sharded_ddp=False, cudnn_enabled=True, cudnn_benchmark=False, cudnn_deterministic=False, collect_stats=False, write_collected_feats=False, max_epoch=60, max_update=9223372036854775807, patience=None, val_scheduler_criterion=['valid', 'loss'], early_stopping_criterion=['valid', 'loss', 'min'], best_model_criterion=[['valid', 'generator_multi_spectral_recon_loss', 'min']], keep_nbest_models=60, nbest_averaging_interval=0, grad_clip=-1, grad_clip_type=2.0, grad_noise=False, accum_grad=1, no_forward_run=False, resume=True, train_dtype='float32', use_amp=False, log_interval=50, use_tensorboard=True, use_wandb=False, wandb_project=None, wandb_id=None, wandb_entity=None, wandb_name=None, wandb_model_log_interval=-1, detect_anomaly=False, pretrain_path=None, init_param=[], ignore_init_mismatch=True, freeze_param=[], num_iters_per_epoch=10000, batch_size=256, valid_batch_size=None, batch_bins=8000000, valid_batch_bins=None, drop_last=True, train_shape_file=['exp/inhouse_open/train/speech_shape'], valid_shape_file=['exp/inhouse_open/dev/speech_shape'], batch_type='unsorted', valid_batch_type=None, speech_length_min=-1, speech_length_max=-1, fold_length=[512, 150], sort_in_batch='descending', sort_batch='descending', multiple_iterator=False, chunk_length=500, chunk_shift_ratio=0.5, num_cache_chunks=1024, dataset_type='small', dataset_conf={}, train_data_file=None, valid_data_file=None, train_data_path_and_name_and_type=[['dump/inhouse_open/train/wav.scp.pai', 'speech', 'kaldi_ark']], valid_data_path_and_name_and_type=[['dump/inhouse_open/dev/wav.scp.pai', 'speech', 'kaldi_ark']], allow_variable_data_keys=False, max_cache_size=0.0, max_cache_fd=32, valid_max_cache_size=None, optim='adam', optim_conf={'lr': 0.0003, 'betas': [0.5, 0.9]}, scheduler=None, scheduler_conf={'step_size': 8, 'gamma': 0.1}, optim2='adam', optim2_conf={'lr': 0.0003, 'betas': [0.5, 0.9]}, scheduler2=None, scheduler2_conf={'step_size': 8, 'gamma': 0.1}, simple_ddp=False, num_worker_count=2, generator_first=False, input_size=1, cmvn_file=None, disc_grad_clip=-1, disc_grad_clip_type=2.0, gen_train_interval=1, disc_train_interval=1, stat_flops=False, use_preprocessor=True, speech_volume_normalize=None, speech_rms_normalize=False, speech_max_length=51200, sampling_rate=16000, valid_max_length=51200, frontend=None, frontend_conf={}, normalize=None, normalize_conf={}, encoder='encodec_seanet_encoder', encoder_conf={'ratios': [8, 5, 4, 2, 2], 'norm': 'time_group_norm', 'causal': False}, quantizer='costume_quantizer', quantizer_conf={'codebook_size': 1024, 'num_quantizers': 32, 'ema_decay': 0.99, 'kmeans_init': True, 'sampling_rate': 16000, 'quantize_dropout': True, 'rand_num_quant': [2, 4, 8, 16, 32], 'use_ddp': True, 'encoder_hop_length': 640}, decoder='encodec_seanet_decoder', decoder_conf={'ratios': [8, 5, 4, 2, 2], 'norm': 'time_group_norm', 'causal': False}, model='encodec', model_conf={'odim': 128, 'multi_spectral_window_powers_of_two': [5, 6, 7, 8, 9, 10], 'target_sample_hz': 16000, 'audio_normalize': True, 'segment_dur': None, 'overlap_ratio': None, 'use_power_spec_loss': True}, discriminator='multiple_disc', discriminator_conf={'disc_conf_list': [{'filters': 32, 'name': 'encodec_multi_scale_stft_discriminator'}]}, distributed=True, version='0.2.0', device='cuda:4', bypass_quantizer=True)
+2024-06-05 13:29:15,trainer,INFO,...epoch 0...
+2024-06-05 13:29:19,trainer,INFO,epoch 0, tr loss: 0.000000  [    2/20000], time: 3527.40ms

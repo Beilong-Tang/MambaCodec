@@ -13,6 +13,7 @@ model:
   
 data:
   name: WHAM # have to be in [WHAM, ]
+  length: 32000 # 4 second x 8000 sample rate
   tr: 
     mix: /DKUdata/tangbl/MambaCodec/data/wham/tr/mix.scp
     source: /DKUdata/tangbl/MambaCodec/data/wham/tr/s.scp

@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 
 class WhamDataset(Dataset):
-    def __init__(self, mix_path, source_path):
+    def __init__(self, mix_path, source_path, length):
         self.mix = []
         self.source = [] 
         with open(mix_path,"r") as f:
@@ -14,6 +14,7 @@ class WhamDataset(Dataset):
             lines = f.readlines()
             for l in lines:
                 self.source.append(l.replace("\n","").split(" ")[-1])
+        self.length = length
     
     def __len__(self):
         return len(self.mix)
@@ -22,9 +23,18 @@ class WhamDataset(Dataset):
         """
         return: mix_audio, clean_audio
         """
-        mix_audio,_ = torchaudio.load(self.mix[idx]) 
+        mix_audio,_ = torchaudio.load(self.mix[idx])
         clean_audio, _ = torchaudio.load(self.source[idx])
-        return mix_audio[0], clean_audio[0] # reduce the multi-channel to single-channel audio by only considering the first channel
+        mix_audio = mix_audio[0] # [T] reduce it to single-channel
+        clean_audio = clean_audio[0] # [T] reduce it to single-channel
+        if mix_audio.size(0) <self.length:
+            pad_tensor = torch.zeros(self.length - mix_audio.size(0))
+            clean_audio = torch.cat([clean_audio, pad_tensor])
+            mix_audio = torch.cat([mix_audio, pad_tensor])
+        elif mix_audio.size(0) > self.length:
+            mix_audio = mix_audio[:self.length]
+            clean_audio = clean_audio[:self.length]
+        return mix_audio, clean_audio # reduce the multi-channel to single-channel audio by only considering the first channel
 
 
 def load_dataset(config):

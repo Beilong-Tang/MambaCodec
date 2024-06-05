@@ -58,7 +58,7 @@ class Trainer():
             self.tr_loss[epoch] = loss.item()
             if batch * mix_audio.size(0) % self.log_interval == 0:
                 loss, current = loss.item(), (batch + 1) * len(mix_audio)
-                logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2d}ms")
+                logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")
                 start_time = time.time()
         pass
     
