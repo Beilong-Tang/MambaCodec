@@ -46,7 +46,7 @@ class Trainer():
         self.model.train()
         start_time = time.now()
         for batch, (mix_audio, clean_audio) in enumerate(tr_data):
-            mix, clean = mix.to(self.device), clean_audio.to(self.device)
+            mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             with torch.no_grad():
                 input_emb = self.model.encode(mix)
                 true_emb = self.model.encode(clean)
@@ -68,7 +68,7 @@ class Trainer():
         mse_loss_total = 0 
         si_snr_loss_total = 0 
         for mix_audio, clean_audio in cv_data:
-            mix, clean = mix.to(self.device), clean_audio.to(self.device)
+            mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             with torch.no_grad():
                 input_emb = self.model.encode(mix)
                 output_y = self.model.mamba(input_emb)
