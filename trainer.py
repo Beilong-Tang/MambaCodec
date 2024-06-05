@@ -57,8 +57,8 @@ class Trainer():
             optim.zero_grad()
             self.tr_loss[epoch] = loss.item()
             if batch * mix_audio.size(0) % self.log_interval == 0:
-                loss, current = loss.item(), (batch + 1) * len(X)
-                logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(size*len(X)):>5d}], time: {(time.now() - start_time)*1000 :.2d}ms")
+                loss, current = loss.item(), (batch + 1) * len(mix_audio)
+                logger.info(f"epoch {epoch}, tr loss: {loss:>7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.now() - start_time)*1000 :.2d}ms")
                 start_time = time.now()
         pass
     
@@ -68,7 +68,7 @@ class Trainer():
         mse_loss_total = 0 
         si_snr_loss_total = 0 
         for mix_audio, clean_audio in cv_data:
-            mix, clean = mix.to(self.device), clean.to(self.device)
+            mix, clean = mix.to(self.device), clean_audio.to(self.device)
             with torch.no_grad():
                 input_emb = self.model.encode(mix)
                 output_y = self.model.mamba(input_emb)
@@ -87,7 +87,7 @@ class Trainer():
         loss_dict['si_snr'] = si_snr_loss_avg
         self.cv_loss[epoch] = loss_dict
     
-    def train():
+    def train(self):
         loss_fn = nn.MSELoss()
         for epoch in range(self.epoch_start, config['epoch']):
             logger.info(f"...epoch {epoch}...")
