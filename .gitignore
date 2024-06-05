@@ -1,3 +1,4 @@
 ## model parameters
 /ckpt/*
 __pycache__/
+logs/*
