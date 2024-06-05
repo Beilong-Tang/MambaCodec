@@ -28,7 +28,7 @@ def main(args):
     tr_data = DataLoader(tr_dataset, batch_size = config['batch_size'])
     cv_data = DataLoader(cv_dataset, batch_size = config['batch_size'])
     ### prepare model
-    model = MambaCodec(**config['codec'])
+    model = MambaCodec(**{**config['codec'], **config['model'], **{"device":args.device}})
     ### prepare optim
     optim = get_instance(torch.optim, config['optim'], model.parameters())
     ### start training loop
@@ -45,7 +45,7 @@ if __name__ =="__main__":
     parser.add_argument("--ddp", action = "store_true")
     parser.add_argument("--gpus", type = str, default = "4,5,6,7")
     parser.add_argument("--device", type = str, default = "cuda:4")
-    parser.add_argument("--name", type = str, default = "base", required = True)
+    parser.add_argument("--name", type = str, required = True)
     parser.add_argument("--ckpt_path", type = str, required = True)
     args = parser.parse_args()
     main(args)

@@ -17,12 +17,11 @@ class MambaCodec(nn.Module):
                 d_state,
                 d_conv,
                 expand,
-                emb_dim = 128, 
+                mamba_num,
+                emb_dim = 128, ### Not sure about it yet
                 device = "cpu", 
                 bypass_quantizer = True, 
                 sampling_rate = 8000,
-                mamba_num,
-                
                 **kwargs
                 ):
         super().__init__()

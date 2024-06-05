@@ -1,0 +1,1 @@
+python train.py --config_path /DKUdata/tangbl/MambaCodec/config/base.yaml --name base --ckpt_path /DKUdata/tangbl/MambaCodec/ckpt

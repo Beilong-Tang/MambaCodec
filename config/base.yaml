@@ -4,12 +4,12 @@ codec:
   bypass_quantizer: True
 
 model:
-  num: 6
+  mamba_num: 6
   d_model: 128
   d_state: 16
   d_conv: 4
   expand: 2
-  sample_rate: 8000
+  sampling_rate: 8000
   
 data:
   name: WHAM # have to be in [WHAM, ]

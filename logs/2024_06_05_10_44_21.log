@@ -1,0 +1,1 @@
+2024-06-05 10:45:28,__main__,INFO,train.py --config_path /DKUdata/tangbl/MambaCodec/config/base.yaml --name base --ckpt_path /DKUdata/tangbl/MambaCodec/ckpt
