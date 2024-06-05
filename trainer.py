@@ -96,4 +96,4 @@ class Trainer():
             ### evaluation calculate mse loss as well as si_snr loss
             self._eval(loss_fn, self.cv_data, epoch)
             ### save model 
-            self._save(self.model, self.tr_loss, self.cv_loss, epoch, optim, os.path.join(self.ckpt_path, self.name, f"epoch{epoch}.pth"))
+            self._save(self.model, self.tr_loss, self.cv_loss, epoch, self.optim, os.path.join(self.ckpt_path, self.name, f"epoch{epoch}.pth"))
