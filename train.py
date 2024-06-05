@@ -2,6 +2,7 @@ import argparse
 import yaml
 import sys
 import os
+import torch
 ### set up logging
 import logging 
 import datetime
