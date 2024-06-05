@@ -25,7 +25,7 @@ class MambaCodec(nn.Module):
                 **kwargs
                 ):
         super().__init__()
-        self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sample_rate)
+        self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
         self.mamba = MambaBlocks(
             # This module uses roughly 3 * expand * d_model^2 parameters
             num = mamba_num,
