@@ -26,4 +26,31 @@ def si_snr_loss_fn(output, target):
         const_tensor = torch.zeros(target.size(0), dim)
         output = torch.cat((output,const_tensor), dim = 1)
         pass
-    return si_snr(output, target)
+    return -1 * si_snr(output, target)
+
+
+def vec_dot_mul(y1, y2):
+    dot_mul = torch.sum(torch.mul(y1, y2), dim=-1)
+    # print('dot', dot_mul.size())
+    return dot_mul
+
+def vec_normal(y):
+    normal_ = torch.sqrt(torch.sum(y**2, dim=-1))
+    # print('norm',normal_.size())
+    return normal_
+
+def cos_loss_fn(est, ref): # -cos
+    '''
+    est, ref: [batch, ..., n_sample]
+    '''
+    # print(est.size(), ref.size(), flush=True)
+    cos_sim = - torch.div(vec_dot_mul(est, ref), # [batch, ...]
+        torch.mul(vec_normal(est), vec_normal(ref)))
+    loss = torch.mean(cos_sim)
+    return loss
+
+
+mseLoss = torch.nn.MSELoss()
+def mse_loss_fn(est,ref):
+    return mseLoss(est, ref)
+    

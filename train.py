@@ -3,6 +3,8 @@ import yaml
 import sys
 import os
 import torch
+import random
+import numpy as np 
 ### set up logging
 import logging 
 import datetime
@@ -15,10 +17,23 @@ logger = logging.getLogger(__name__)
 ###
 from torch.utils.data import DataLoader
 
-from utils import get_instance
-from trainer import Trainer
+from utils import get_instance, get_class
 from dataset.dataset import load_dataset
 from models.model import MambaCodec
+import loss
+
+## detect error
+torch.autograd.set_detect_anomaly(True)
+
+# fix random seeds for reproducibility
+SEED = 1234
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
+torch.cuda.manual_seed_all(SEED)
 
 def main(args):
     with open(args.config_path, "r") as f:
@@ -31,9 +46,10 @@ def main(args):
     ### prepare model
     model = MambaCodec(**{**config['codec'], **config['model'], **{"device":args.device}})
     ### prepare optim
-    optim = get_instance(torch.optim, config['optim'], model.parameters())
+    optim = get_instance(torch.optim, config['optim'], model.mambaModel.parameters())
     ### start training loop
-    trainer = Trainer(model, tr_data, cv_data, optim, config, args, args.device)
+    trainer_class = get_class("trainer", "MseTrainer")
+    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, args.device, getattr(loss, f"{config['loss']}_loss_fn"))
     trainer.train()
 
     pass

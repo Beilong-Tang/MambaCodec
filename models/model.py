@@ -28,14 +28,22 @@ class MambaCodec(nn.Module):
                 ):
         super().__init__()
         self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
-        self.mambaModel = MambaBlocks(
-            # This module uses roughly 3 * expand * d_model^2 parameters
-            num = mamba_num,
-            d_model=d_model, # Model dimension d_model
-            d_state=d_state,  # SSM state expansion factor
-            d_conv=d_conv,    # Local convolution width
-            expand=expand,    # Block expansion factor
-            ).to(device)
+
+        encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8)
+        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
+        self.mambaModel = transformer_encoder.to(device)
+        
+        # self.mambaModel =  MambaBlocks(
+        #     # This module uses roughly 3 * expand * d_model^2 parameters
+        #     num = mamba_num,
+        #     d_model=d_model, # Model dimension d_model
+        #     d_state=d_state,  # SSM state expansion factor
+        #     d_conv=d_conv,    # Local convolution width
+        #     expand=expand,    # Block expansion factor
+        #     ).to(device)
+        ## freeze model parameters
+        for param in self.speech2Token.parameters():
+            param.requires_grad = False
         mamba_param_num = sum(p.numel() for p in self.mambaModel.parameters())
         logger.info(f"mamba parameters {mamba_param_num}")
     

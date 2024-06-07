@@ -1,0 +1,42 @@
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/utils/weight_norm.py:28: UserWarning: torch.nn.utils.weight_norm is deprecated in favor of torch.nn.utils.parametrizations.weight_norm.
+  warnings.warn("torch.nn.utils.weight_norm is deprecated in favor of torch.nn.utils.parametrizations.weight_norm.")
+bypass_quantizer True
+cuda:5
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/transformer.py:306: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.self_attn.batch_first was not True(use batch_first for better inference performance)
+  warnings.warn(f"enable_nested_tensor is True, but self.use_nested_tensor is False because {why_not_sparsity_fast_path}")
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+Traceback (most recent call last):
+  File "/DKUdata/tangbl/MambaTransformer/train.py", line 68, in <module>
+    main(args)
+  File "/DKUdata/tangbl/MambaTransformer/train.py", line 53, in main
+    trainer.train()
+  File "/DKUdata/tangbl/MambaTransformer/trainer.py", line 93, in train
+    self._train(self.loss_fn, self.optim, self.tr_data, epoch)
+  File "/DKUdata/tangbl/MambaTransformer/trainer.py", line 52, in _train
+    output_y = self.model.mamba(input_emb)
+  File "/DKUdata/tangbl/MambaTransformer/models/model.py", line 66, in mamba
+    return self.mambaModel(emb)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/transformer.py", line 415, in forward
+    output = mod(output, src_mask=mask, is_causal=is_causal, src_key_padding_mask=src_key_padding_mask_for_layers)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/transformer.py", line 749, in forward
+    x = self.norm1(x + self._sa_block(x, src_mask, src_key_padding_mask, is_causal=is_causal))
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/transformer.py", line 761, in _sa_block
+    return self.dropout1(x)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/dropout.py", line 59, in forward
+    return F.dropout(input, self.p, self.training, self.inplace)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/functional.py", line 1295, in dropout
+    return _VF.dropout_(input, p, training) if inplace else _VF.dropout(input, p, training)
+KeyboardInterrupt

@@ -38,18 +38,22 @@ class WhamDataset(Dataset):
         return mix_audio, clean_audio # reduce the multi-channel to single-channel audio by only considering the first channel
 
 
-def load_dataset(config):
+def load_dataset(config, mode= "train"):
     if config['data']['name'] == 'WHAM':
-        return load_wham_dataset(config)
+        return load_wham_dataset(config, mode)
     else:
         raise NotImplementedError("other dataset loading is not implemented")
 
-def load_wham_dataset(config):
+def load_wham_dataset(config, mode = "train"):
     """
         return training dataset and cv dataset
     """
-    tr_path = config['data']['tr']
-    cv_path = config['data']['cv']
-    return (WhamDataset(tr_path['mix'], tr_path['source'], config['data']['length']),
-            WhamDataset(cv_path['mix'], cv_path['source'], config['data']['length']))
+    if mode == "train":
+        tr_path = config['data']['tr']
+        cv_path = config['data']['cv']
+        return (WhamDataset(tr_path['mix'], tr_path['source'], config['data']['length']),
+                WhamDataset(cv_path['mix'], cv_path['source'], config['data']['length']))
+    elif mode == "inference":
+        infer_path = config['data']['tt']
+        return WhamDataset(infer_path['mix'], infer_path['source'], config['data']['length'])
 

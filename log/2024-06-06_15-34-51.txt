@@ -1,0 +1,54 @@
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/utils/weight_norm.py:28: UserWarning: torch.nn.utils.weight_norm is deprecated in favor of torch.nn.utils.parametrizations.weight_norm.
+  warnings.warn("torch.nn.utils.weight_norm is deprecated in favor of torch.nn.utils.parametrizations.weight_norm.")
+bypass_quantizer True
+cuda:5
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/transformer.py:306: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.self_attn.batch_first was not True(use batch_first for better inference performance)
+  warnings.warn(f"enable_nested_tensor is True, but self.use_nested_tensor is False because {why_not_sparsity_fast_path}")
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/autograd/graph.py:744: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+Traceback (most recent call last):
+  File "/DKUdata/tangbl/MambaTransformer/train.py", line 68, in <module>
+    main(args)
+  File "/DKUdata/tangbl/MambaTransformer/train.py", line 53, in main
+    trainer.train()
+  File "/DKUdata/tangbl/MambaTransformer/trainer.py", line 96, in train
+    self._train(self.loss_fn, self.optim, self.tr_data, epoch)
+  File "/DKUdata/tangbl/MambaTransformer/trainer.py", line 50, in _train
+    true_emb = self.model.encode(clean)
+  File "/DKUdata/tangbl/MambaTransformer/models/model.py", line 57, in encode
+    return self.speech2Token.encode(x)
+  File "/DKUdata/tangbl/FunCodec/funcodec/bin/codec_inference.py", line 146, in encode
+    ret_dict = self.model.inference_encoding(*batch, need_recon=False, bit_width=None)
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/codec_basic.py", line 753, in inference_encoding
+    quant_out, indices, sub_quants = self.quantizer.inference(quant_in, bandwidth=bit_width)
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/quantizer/costume_quantizer.py", line 89, in inference
+    qv = self.rq(x.permute(0, 2, 1), self.sampling_rate, bandwidth)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/vq.py", line 99, in forward
+    quantized, codes, commit_loss, sub_quants = self.model(x, n_q=n_q)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/ddp_core_vq.py", line 398, in forward
+    quantized, indices, loss = layer(quant_in, [
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/ddp_core_vq.py", line 310, in forward
+    quantize, embed_ind = self._codebook(x, buffers)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/ddp_core_vq.py", line 228, in forward
+    self.expire_codes_(x)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/ddp_core_vq.py", line 172, in expire_codes_
+    if not torch.any(expired_codes):
+KeyboardInterrupt
