@@ -48,8 +48,8 @@ def main(args):
     ### prepare optim
     optim = get_instance(torch.optim, config['optim'], model.mambaModel.parameters())
     ### start training loop
-    trainer_class = get_class("trainer", "MseTrainer")
-    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, args.device, getattr(loss, f"{config['loss']}_loss_fn"))
+    trainer_class = get_class("trainer", f"{config['loss']}Trainer")
+    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, args.device, getattr(loss, f"{config['loss'].lower()}_loss_fn"))
     trainer.train()
 
     pass
