@@ -7,7 +7,7 @@ from loss import si_snr_loss_fn
 logger = logging.getLogger(__name__)
 
 
-class MseTrainer():
+class RmseTrainer():
     def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
         self.model = model 
         self.tr_data = tr_data

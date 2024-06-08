@@ -34,4 +34,5 @@ optim:
     lr: 0.001
     weight_decay: 0
 
-loss: Cos # [Sisnr, Mse, Cos]
+loss: rmsesisnr # [sisnr, mse, cos]
+ratio: 1

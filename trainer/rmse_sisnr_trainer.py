@@ -3,11 +3,11 @@ import torch
 import torch.nn as nn 
 import os 
 import time
-from loss import si_snr_loss_fn
+from loss import si_snr_loss_fn, mse_loss_fn
 logger = logging.getLogger(__name__)
 
 
-class MseTrainer():
+class RmseSisnrTrainer():
     def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
         self.model = model 
         self.tr_data = tr_data
@@ -22,6 +22,10 @@ class MseTrainer():
         self.device = device
         self.log_interval = config['log_interval']
         self.loss_fn = loss_fn
+        ##
+        ## loss ration
+        ##
+        self.loss_ratio = config['ratio']
         os.makedirs(os.path.join(self.ckpt_path, self.name), exist_ok = True)
         if not args.continue_from ==None:
             logger.info(f"loading model from {args.continue_from}...")
@@ -49,11 +53,13 @@ class MseTrainer():
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             ## true
             true_emb = self.model.encode(clean)
+            true_audio = self.model.decode(true_emb)
             
             ## mix
             input_emb = self.model.encode(mix)
             output_y = self.model.mamba(input_emb)
-            loss = loss_fn(output_y,true_emb)
+            output_audio = self.model.decode(output_y)
+            loss = loss_fn(output_y,true_emb, output_audio, true_audio)
             loss.backward()
             
             #### gradient clipping
@@ -82,14 +88,14 @@ class MseTrainer():
                 output_audio = self.model.decode(output_y)
                 true_emb = self.model.encode(clean)
                 true_audio = self.model.decode(true_emb)
-                mse_loss = loss_fn(output_y, true_emb).item()
+                mse_loss = loss_fn(output_y, true_emb, output_audio, true_audio).item()
                 si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
                 si_snr_loss_total += si_snr_loss
                 mse_loss_total += mse_loss
         mse_loss_avg= mse_loss_total / len(cv_data)
         si_snr_loss_avg = si_snr_loss_total / len(cv_data)
         logger.info(f"epoch {epoch}, cv loss: {(mse_loss_avg) :>.7f}, si_snr loss: {(si_snr_loss_avg) :>7f}")
-        loss_dict['cos'] = mse_loss_avg
+        loss_dict['loss'] = mse_loss_avg
         loss_dict['si_snr'] = si_snr_loss_avg
         self.cv_loss[epoch] = loss_dict
     

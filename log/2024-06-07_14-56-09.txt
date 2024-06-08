@@ -7,44 +7,52 @@ cuda:5
 /DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
   return F.conv1d(input, weight, bias, self.stride,
 Traceback (most recent call last):
-  File "/DKUdata/tangbl/MambaTransformer/train.py", line 68, in <module>
+  File "/DKUdata/tangbl/MambaTransformer/train.py", line 71, in <module>
     main(args)
-  File "/DKUdata/tangbl/MambaTransformer/train.py", line 53, in main
+  File "/DKUdata/tangbl/MambaTransformer/train.py", line 48, in main
     trainer.train()
-  File "/DKUdata/tangbl/MambaTransformer/trainer.py", line 102, in train
-    ### evaluation calculate mse loss as well as si_snr loss
-  File "/DKUdata/tangbl/MambaTransformer/trainer.py", line 51, in _train
-    true_emb = self.model.encode(clean)
+  File "/DKUdata/tangbl/MambaTransformer/trainer/rmse_trainer.py", line 100, in train
+    self._train(self.loss_fn, self.optim, self.tr_data, epoch)
+  File "/DKUdata/tangbl/MambaTransformer/trainer/rmse_trainer.py", line 54, in _train
+    input_emb = self.model.encode(mix)
   File "/DKUdata/tangbl/MambaTransformer/models/model.py", line 57, in encode
     return self.speech2Token.encode(x)
   File "/DKUdata/tangbl/FunCodec/funcodec/bin/codec_inference.py", line 146, in encode
     ret_dict = self.model.inference_encoding(*batch, need_recon=False, bit_width=None)
-  File "/DKUdata/tangbl/FunCodec/funcodec/models/codec_basic.py", line 753, in inference_encoding
-    quant_out, indices, sub_quants = self.quantizer.inference(quant_in, bandwidth=bit_width)
-  File "/DKUdata/tangbl/FunCodec/funcodec/models/quantizer/costume_quantizer.py", line 89, in inference
-    qv = self.rq(x.permute(0, 2, 1), self.sampling_rate, bandwidth)
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/codec_basic.py", line 750, in inference_encoding
+    frames = self._encode(speech)
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/codec_basic.py", line 361, in _encode
+    encoded_frames.append(self._encode_frame(frame))
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/codec_basic.py", line 381, in _encode_frame
+    emb = self.encoder(x)
   File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
     return self._call_impl(*args, **kwargs)
   File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
     return forward_call(*args, **kwargs)
-  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/vq.py", line 99, in forward
-    quantized, codes, commit_loss, sub_quants = self.model(x, n_q=n_q)
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/encoder/seanet_encoder.py", line 175, in forward
+    outs = self.model(x).permute(0, 2, 1)
   File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
     return self._call_impl(*args, **kwargs)
   File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
     return forward_call(*args, **kwargs)
-  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/ddp_core_vq.py", line 398, in forward
-    quantized, indices, loss = layer(quant_in, [
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
   File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
     return self._call_impl(*args, **kwargs)
   File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
     return forward_call(*args, **kwargs)
-  File "/DKUdata/tangbl/FunCodec/funcodec/modules/quantization/ddp_core_vq.py", line 320, in forward
-    loss = loss + commit_loss * self.commitment_weight
-  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/fx/traceback.py", line 67, in format_stack
-    return traceback.format_list(traceback.extract_stack()[:-1])
-  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/traceback.py", line 39, in format_list
-    return StackSummary.from_list(extracted_list).format()
-  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/traceback.py", line 420, in format
-    if count > _RECURSIVE_CUTOFF:
+  File "/DKUdata/tangbl/FunCodec/funcodec/models/encoder/seanet_encoder.py", line 61, in forward
+    return self.shortcut(x) + self.block(x) # This is simply the sum of two tensors of the same size
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/normed_modules/conv.py", line 259, in forward
+    x = self.conv(x)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/DKUdata/tangbl/anaconda/envs/bltang/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/DKUdata/tangbl/FunCodec/funcodec/modules/normed_modules/conv.py", line 159, in forward
+    if torch.isnan(torch.sum(x)).any():
 KeyboardInterrupt

@@ -53,4 +53,18 @@ def cos_loss_fn(est, ref): # -cos
 mseLoss = torch.nn.MSELoss()
 def mse_loss_fn(est,ref):
     return mseLoss(est, ref)
-    
+
+def rmse_loss_fn(y1, y2, RL_epsilon=1e-8, index_=2.0):
+   # y1, y2 : [N, F, T] or [N, c, F, T]
+    relative_loss = torch.abs(y1-y2)/(torch.abs(y1)+torch.abs(y2)+RL_epsilon)
+    loss = torch.pow(relative_loss, index_)
+    loss = torch.mean(torch.sum(loss, -2))
+    return loss
+
+def rmse_sisnr_loss_fn(y1,y2, output, target, ratio = 1):
+    """
+    combine rmse with sisnr loss
+    """
+    rmse_loss = rmse_loss_fn(y1, y2)
+    si_snr_loss = si_snr_loss_fn(output,target)
+    return rmse_loss + ratio * si_snr_loss

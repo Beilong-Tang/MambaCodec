@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "/DKUdata/tangbl/MambaTransformer/train.py", line 23, in <module>
-    from models.model import MambaCodec
-  File "/DKUdata/tangbl/MambaTransformer/models/model.py", line 32
-    encoder_layer = nn.TransformerEncoderLayer(d_model=128 nhead=8)
-                                                           ^
-SyntaxError: invalid syntax
