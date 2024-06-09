@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 def si_snr_loss_fn(output, target):
     """
     calculate si_snr loss on output audio and target audio
@@ -23,7 +24,7 @@ def si_snr_loss_fn(output, target):
         output= output[:,:target.size(1)]
     else:
         dim = target.size(1) - output.size(1)
-        const_tensor = torch.zeros(target.size(0), dim)
+        const_tensor = torch.zeros(target.size(0), dim).to(output.device)
         output = torch.cat((output,const_tensor), dim = 1)
         pass
     return -1 * si_snr(output, target)
@@ -68,3 +69,13 @@ def rmse_sisnr_loss_fn(y1,y2, output, target, ratio = 1):
     rmse_loss = rmse_loss_fn(y1, y2)
     si_snr_loss = si_snr_loss_fn(output,target)
     return rmse_loss + ratio * si_snr_loss
+
+crossEntropyLoss = nn.CrossEntropyLoss()
+def cross_entropy_loss_fn(src, tgt):
+    """
+    src with shape (B, n_q, T, K)
+    tgt with shape (n_q, B, T)
+    """
+    src_ = src.permute(0, 3, 2, 1) # [B, K , T, n_q]
+    tgt_ = tgt.permute(1, 2, 0) # [B, T, n_q]
+    return crossEntropyLoss(src_, tgt_)

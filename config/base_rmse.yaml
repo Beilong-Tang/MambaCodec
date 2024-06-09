@@ -4,6 +4,7 @@ codec:
   bypass_quantizer: True
 
 model:
+  type: MambaCodec
   mamba_num: 6
   d_model: 128
   d_state: 128

@@ -14,7 +14,6 @@ from torch.utils.data import DataLoader
 
 from utils import get_instance, get_class, get_attr
 from dataset.dataset import load_dataset
-from models.model import MambaCodec
 import loss
 
 ## detect error
@@ -39,7 +38,9 @@ def main(args):
     tr_data = DataLoader(tr_dataset, batch_size = config['batch_size'])
     cv_data = DataLoader(cv_dataset, batch_size = config['batch_size'])
     ### prepare model
-    model = MambaCodec(**{**config['codec'], **config['model'], **{"device":args.device}})
+    model_class = get_class("models", config['model']['type'])
+    model = model_class(**{**config['codec'], **config['model'], **{"device":args.device}})
+    model.to(args.device)
     ### prepare optim
     optim = get_instance(torch.optim, config['optim'], model.mambaModel.parameters())
     ### start training loop

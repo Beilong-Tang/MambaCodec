@@ -4,13 +4,13 @@ codec:
   bypass_quantizer: True
 
 model:
-  type: MambaCodec
+  type: TransformerCross
   mamba_num: 6
   d_model: 128
   d_state: 128
   d_conv: 4
   expand: 2
-  sampling_rate: 8000
+  sampling_rate: 16000
   
 data:
   name: WHAM # have to be in [WHAM, ]
@@ -35,4 +35,4 @@ optim:
     lr: 0.001
     weight_decay: 0
 
-loss: Cos # [Sisnr, Mse, Cos]
+loss: CrossEntropy # [Sisnr, Mse, Cos]

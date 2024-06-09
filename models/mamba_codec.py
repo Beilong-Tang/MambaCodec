@@ -11,7 +11,6 @@ from codec_inference import Speech2Token
 from mamba_ssm import Mamba
 
 class MambaCodec(nn.Module):
-
     def __init__(self, 
                 config_path, 
                 model_path, 
@@ -30,8 +29,9 @@ class MambaCodec(nn.Module):
         self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
 
         encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8)
+        # transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12, d_model = 128)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
-        self.mambaModel = transformer_encoder.to(device)
+        self.mambaModel =transformer_encoder.to(device)
         
         # self.mambaModel =  MambaBlocks(
         #     # This module uses roughly 3 * expand * d_model^2 parameters
@@ -63,6 +63,7 @@ class MambaCodec(nn.Module):
         Returns:
             - the embedding after mamba layers (B, T', emb_dim)
         """
+
         return self.mambaModel(emb)
 
     def decode(self, emb):
@@ -92,3 +93,4 @@ class MambaBlocks(nn.Module):
         """
         return self.blocks(x)
         pass
+

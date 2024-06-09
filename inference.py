@@ -9,8 +9,8 @@ import tqdm
 import yaml
 
 from torch.utils.data import Subset
+from utils import get_class 
 from dataset.dataset import load_dataset
-from models.model import MambaCodec
 
 def main(args):
     output_path = os.path.join(args.output_path,args.name)
@@ -20,15 +20,16 @@ def main(args):
     tr_dataset, cv_dataset = load_dataset(config)
 
     ckpt = torch.load(args.ckpt_path)
-    model = MambaCodec(**{**config['codec'], **config['model'], **{"device":args.device}})
+    model_class = get_class("models",config['model']['type'])
+    model =model_class(**{**config['codec'], **config['model'], **{"device":args.device}})
     model.load_state_dict(ckpt['model_state_dict'])
     model.eval()
-
+    model.to(args.device)
 
     subset_indices = list(range(args.num))
     subset = Subset(tr_dataset, subset_indices)
     with torch.no_grad():
-        for idx,(mix, clean) in tqdm.tqdm(enumerate(subset)):
+        for idx,(mix, clean) in tqdm.tqdm(enumerate(subset), total = args.num):
             mix, clean = mix.to(args.device).unsqueeze(0), clean.to(args.device).unsqueeze(0)
             output_emb = model.encode(mix)
             output_y =model.mamba(output_emb)
@@ -38,7 +39,6 @@ def main(args):
             torchaudio.save(os.path.join(output_path,f"{idx}_output.wav"),audio.cpu(), config['model']['sampling_rate'])
             torchaudio.save(os.path.join(output_path,f"{idx}_mix.wav"),mix.cpu(), config['model']['sampling_rate'])
     pass
-
 
 
 if __name__ =="__main__":
