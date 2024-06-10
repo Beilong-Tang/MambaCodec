@@ -51,7 +51,6 @@ class SiSnrTrainer():
             input_emb = self.model.encode(mix)
             output_y = self.model.mamba(input_emb)
             output_audio = self.model.decode(output_y).squeeze(1) # [B, T]
-            clean = self.model.decode(self.model.encode(clean)).squeeze(1)
             loss = loss_fn(output_audio,clean)
             loss.backward()
             
@@ -79,10 +78,8 @@ class SiSnrTrainer():
                 input_emb = self.model.encode(mix)
                 output_y = self.model.mamba(input_emb)
                 output_audio = self.model.decode(output_y).squeeze(1) # [B,T]
-                true_emb = self.model.encode(clean)
-                true_audio = self.model.decode(true_emb).squeeze(1) # [B,T]
                 mse_loss = loss_fn(output_audio, clean).item()
-                si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
+                si_snr_loss = si_snr_loss_fn(output_audio, clean).item()
                 si_snr_loss_total += si_snr_loss
                 mse_loss_total += mse_loss
         mse_loss_avg= mse_loss_total / len(cv_data)
