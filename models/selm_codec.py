@@ -231,7 +231,7 @@ class PositionalEncoding(nn.Module):
         Return:
             [batch, T, emb_dim] after applying positional encoding
         """
-        x = x.permute(1,0,2) # [T, B, F]
+        x = rearrange(x, "b t e -> t b e")
         x = x + self.pe[:x.size(0)]
-        x = x.permute(1,0,2) # [B, T, F]
+        x = rearrange(x, "t b e -> b t e")
         return self.dropout(x)
