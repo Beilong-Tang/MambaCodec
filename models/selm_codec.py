@@ -157,7 +157,7 @@ class SelmCodec(nn.Module):
             raise Exception("have to tokenize before this method!!!")
         res = self.lookup(x) # [B, T, E]
         ### TODO: conformer model here
-        res = self.conformer(res) # [B, T, E]
+        res = self.conformer(res, torch.full((res.shape[0],),res.shape[1]).to(res.device)) # [B, T, E]
         return res[0]
 
     def decode(self, emb):
@@ -210,7 +210,7 @@ class LanguageModel(nn.Module):
         res = self.audio_embedding(x) # [B, T, emb_dim]
         res = self.transformer_encoder(res) # [B,T, emb_dim]
         res = self.linear(res) # [B, T, C]
-    pass
+        return res
 
 class PositionalEncoding(nn.Module):
 

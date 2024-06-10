@@ -76,7 +76,7 @@ class SelmTrainer():
             self.tr_loss[epoch] = {"kl_div": kl_div_loss.item(), "mse": mse_loss.item()}
             if batch % self.log_interval == 0:
                 si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
-                loss, current = si_snr_loss.item(), (batch + 1) * len(mix_audio)
+                loss, current = si_snr_loss, (batch + 1) * len(mix_audio)
                 logger.info(f"epoch {epoch}, tr kl loss: {kl_div_loss.item():>.7f}, mse loss {mse_loss.item():>.7f} si snr loss: {loss:>.7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")
                 start_time = time.time()
     
