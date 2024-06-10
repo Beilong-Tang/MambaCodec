@@ -42,7 +42,7 @@ def main(args):
     model = model_class(**{**config['codec'], **config['model'], **{"device":args.device}})
     model.to(args.device)
     ### prepare optim
-    optim = get_instance(torch.optim, config['optim'], model.mambaModel.parameters())
+    optim = get_instance(torch.optim, config['optim'], model.parameters())
     ### start training loop
     trainer_class = get_class("trainer", f"{config['loss']}Trainer")
     trainer = trainer_class(model, tr_data, cv_data, optim, config, args, args.device, get_attr(loss, config['loss'],"loss_fn"))

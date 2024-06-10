@@ -38,7 +38,7 @@ class TransformerCross(nn.Module):
         # self.linear = nn.Linear(hidden_dim, out_dim)
         encoder_layer = nn.TransformerEncoderLayer(d_model= hidden_dim, nhead=16, batch_first = True)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
-        self.mambaModel2 = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= hidden_dim, nhead= 16), num_layers= 3)
+        self.mambaModel2 = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= hidden_dim, nhead= 16, batch_first = True), num_layers= 3)
         self.softmax = nn.Softmax(dim = -1)
         self.mambaModel =transformer_encoder.to(device)
         for param in self.speech2Token.parameters():

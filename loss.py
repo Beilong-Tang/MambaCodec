@@ -79,3 +79,21 @@ def cross_entropy_loss_fn(src, tgt):
     src_ = src.permute(0, 3, 2, 1) # [B, K , T, n_q]
     tgt_ = tgt.permute(1, 2, 0) # [B, T, n_q]
     return crossEntropyLoss(src_, tgt_)
+
+kl_loss = torch.nn.KLDivLoss(reduce="batchmean")
+
+def kl_div_loss_fn(src, tgt):
+    """
+    src : [B, T, C]
+    tgt : [B, T]
+    """
+    src_ = torch.log_softmax(src, dim = -1)
+    tgt_ = torch.nn.functional.one_hot(tgt, src.shape[-1]).to(src.dtype) # [B, T, C]
+    return kl_loss(src_, tgt_)
+
+def selm_loss_fn():
+    """
+    return kl div loss as well as the mse loss
+
+    """
+    return kl_div_loss_fn, mse_loss_fn

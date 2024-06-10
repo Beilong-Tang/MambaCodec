@@ -144,7 +144,7 @@ class SelmCodec(nn.Module):
             - the probability of shape (B, T', C)
         """
         return self.mambaModel(emb)
-    
+
     def detokenize(self, x):
         """
         args:
@@ -164,7 +164,7 @@ class SelmCodec(nn.Module):
         Args:
             emb: the embedding to be decoded
         Returns:
-            - the reconstructed wav (B, T'') (the wav might be a bit longer than the original one)
+            - the reconstructed wav (B, 1,  T'') (the wav might be a bit longer than the original one)
         """
         return self.speech2Token.decode_emb(emb)
 
