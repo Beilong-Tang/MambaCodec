@@ -1,6 +1,7 @@
 import torch.nn as nn
 import sys 
 import logging 
+import math
 logger = logging.getLogger(__name__)
 
 ### add funcodec path
@@ -104,10 +105,7 @@ class SelmCodec(nn.Module):
         self.kmeans_cluster = 300
         self.kmeans_iter = 10
         self.across_batch = True
-
         self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 512)
-        
-
         self.lookup = None
 
         for param in self.speech2Token.parameters():
@@ -135,7 +133,7 @@ class SelmCodec(nn.Module):
             Remember the kmeans center as the lookup table
         """
         means, tokens = kmeans_batch(emb, self.kmeans_cluster, self.kmeans_iter, self.across_batch)
-        self.lookup = nn.Embedding.from_pretrained(means, freeze = True) ## maintaining look up table
+        self.lookup = nn.Embedding.from_pretrained(means, freeze = True).to(emb.device) ## maintaining look up table
     
     def mamba(self, emb):
         """
@@ -198,7 +196,7 @@ class LanguageModel(nn.Module):
         self.position_encode = PositionalEncoding(emb_dim)
         encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=16, dim_feedforward = 1024, batch_first = True)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=12)
-        self.mambaModel =transformer_encoder.to(device)
+        self.mambaModel =transformer_encoder
         self.linear = nn.Linear(emb_dim, emb_num)
 
     def forward(self,x):
