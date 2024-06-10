@@ -36,7 +36,7 @@ class TransformerCross(nn.Module):
         # self.embedding_layers = [ nn.Embedding(out_dim, hidden_dim).to(self.device) for _ in range(0,32)]
         self.embed = nn.Embedding(out_dim, hidden_dim)
         # self.linear = nn.Linear(hidden_dim, out_dim)
-        encoder_layer = nn.TransformerEncoderLayer(d_model= hidden_dim, nhead=16)
+        encoder_layer = nn.TransformerEncoderLayer(d_model= hidden_dim, nhead=16, batch_first = True)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
         self.mambaModel2 = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= hidden_dim, nhead= 16), num_layers= 3)
         self.softmax = nn.Softmax(dim = -1)

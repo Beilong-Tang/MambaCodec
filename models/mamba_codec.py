@@ -28,7 +28,7 @@ class MambaCodec(nn.Module):
         super().__init__()
         self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
 
-        encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8)
+        encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first = True)
         # transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12, d_model = 128)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
         self.mambaModel =transformer_encoder.to(device)

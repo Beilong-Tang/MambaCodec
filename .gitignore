@@ -2,5 +2,6 @@
 /ckpt/*
 __pycache__/
 logs/*
+log/*
 output/*
 !output/.gitkeep
