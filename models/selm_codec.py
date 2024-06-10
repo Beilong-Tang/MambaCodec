@@ -135,6 +135,7 @@ class SelmCodec(nn.Module):
         """
         means, tokens = kmeans_batch(emb, self.kmeans_cluster, self.kmeans_iter, self.across_batch)
         self.lookup = nn.Embedding.from_pretrained(means, freeze = True).to(emb.device) ## maintaining look up table
+        return tokens
     
     def mamba(self, emb):
         """
@@ -197,8 +198,7 @@ class LanguageModel(nn.Module):
         self.audio_embedding = nn.Embedding(emb_num, emb_dim)
         self.position_encode = PositionalEncoding(emb_dim)
         encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=16, dim_feedforward = 1024, batch_first = True)
-        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=12)
-        self.mambaModel =transformer_encoder
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=12)
         self.linear = nn.Linear(emb_dim, emb_num)
 
     def forward(self,x):

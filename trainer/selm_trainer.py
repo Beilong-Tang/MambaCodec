@@ -21,8 +21,9 @@ class SelmTrainer():
         self.optim = optim
         self.device = device
         self.log_interval = config['log_interval']
-        self.kl_div_loss_fn = loss_fn[0]
-        self.mse_loss_fn = loss_fn[1]
+        self.loss_fn = loss_fn
+        self.kl_div_loss_fn = loss_fn()[0]
+        self.mse_loss_fn = loss_fn()[1]
         os.makedirs(os.path.join(self.ckpt_path, self.name), exist_ok = True)
         if not args.continue_from ==None:
             logger.info(f"loading model from {args.continue_from}...")
