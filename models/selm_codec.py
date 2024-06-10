@@ -106,7 +106,7 @@ class SelmCodec(nn.Module):
         self.kmeans_cluster = 300
         self.kmeans_iter = 10
         self.across_batch = True
-        self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 512)
+        self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 128)
         self.lookup = None
         self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
         for param in self.speech2Token.parameters():
@@ -144,7 +144,7 @@ class SelmCodec(nn.Module):
         Returns:
             - the probability of shape (B, T', C)
         """
-        return self.mambaModel(emb)
+        return self.mambaModel(emb, self.lookup)
 
     def detokenize(self, x):
         """
@@ -190,7 +190,7 @@ class MambaBlocks(nn.Module):
 
 class LanguageModel(nn.Module):
 
-    def __init__(self, emb_num, emb_dim = 512):
+    def __init__(self, emb_num, emb_dim = 128):
         """
         the language model mentioned in selm
         """
@@ -201,13 +201,14 @@ class LanguageModel(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=12)
         self.linear = nn.Linear(emb_dim, emb_num)
 
-    def forward(self,x):
+    def forward(self,x, embedding):
         """
             x, token with shape [B, T]
         Returns:
             y, probability with shape (B, T, C)
         """
-        res = self.audio_embedding(x) # [B, T, emb_dim]
+        res = embedding(x)
+        # res = self.audio_embedding(x) # [B, T, emb_dim]
         res = self.transformer_encoder(res) # [B,T, emb_dim]
         res = self.linear(res) # [B, T, C]
         return res

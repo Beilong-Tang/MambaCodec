@@ -50,11 +50,13 @@ class SelmTrainer():
         for batch, (mix_audio, clean_audio) in enumerate(tr_data):
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             ## true
+            self.model.eval()
             with torch.no_grad():
                 true_emb = self.model.encode(clean)
                 true_token = self.model.tokenize(true_emb)
                 true_audio = self.model.decode(true_emb).squeeze(1)
-            
+            optim.zero_grad()
+            self.model.train()
             ## mix
             input_emb = self.model.encode(mix)
             input_token = self.model.tokenize(input_emb)
