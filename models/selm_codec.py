@@ -12,6 +12,7 @@ from codec_inference import Speech2Token
 from mamba_ssm import Mamba
 
 import torch 
+from torchaudio.models import Conformer
 from einops import rearrange, repeat
 def uniform_init(*shape: int):
     t = torch.empty(shape)
@@ -107,7 +108,7 @@ class SelmCodec(nn.Module):
         self.across_batch = True
         self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 512)
         self.lookup = None
-
+        self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
         for param in self.speech2Token.parameters():
             param.requires_grad = False
         mamba_param_num = sum(p.numel() for p in self.mambaModel.parameters())
@@ -155,7 +156,8 @@ class SelmCodec(nn.Module):
             raise Exception("have to tokenize before this method!!!")
         res = self.lookup(x) # [B, T, E]
         ### TODO: conformer model here
-        pass
+        res = self.conformer(res) # [B, T, E]
+        return res[0]
 
     def decode(self, emb):
         """
