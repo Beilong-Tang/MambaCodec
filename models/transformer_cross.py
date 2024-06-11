@@ -63,7 +63,7 @@ class TransformerCross(nn.Module):
             emb: the index produced by the encode process (n_q, B, T)
         Returns:
             - the possibility after mamba layers (B,T,n_q,K)
-        """
+        """ 
         n_q, B, T = emb.shape
         res = torch.zeros(n_q, B, T, self.emb_dim).to(self.device) ### [n_q, B, T, H]
         for i, layer in enumerate(self.embedding_layers):
