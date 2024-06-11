@@ -95,7 +95,7 @@ class SelmCodec(nn.Module):
                 mamba_num,
                 emb_dim = 128, ### Not sure about it yet
                 device = "cpu", 
-                bypass_quantizer = True, 
+                bypass_quantizer = False, 
                 sampling_rate = 8000,
                 **kwargs
                 ):
@@ -165,9 +165,9 @@ class SelmCodec(nn.Module):
         Args:
             emb: the embedding to be decoded
         Returns:
-            - the reconstructed wav (B, 1,  T'') (the wav might be a bit longer than the original one)
+            - the reconstructed wav (B,  T'') (the wav might be a bit longer than the original one)
         """
-        return self.speech2Token.decode_emb(emb)
+        return self.speech2Token.decode_emb(emb).squeeze(1)
     
     @torch.no_grad()
     def inference(self, mix, clean):

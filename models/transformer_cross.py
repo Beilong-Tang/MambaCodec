@@ -39,7 +39,7 @@ class TransformerCross(nn.Module):
         self.linear_layers = nn.ModuleList([ nn.Linear(emb_dim, hidden_dim) for _ in range(0,32) ])
         # self.embed = nn.Embedding(out_dim, hidden_dim)
         # self.linear = nn.Linear(hidden_dim, out_dim)
-        encoder_layer = nn.TransformerEncoderLayer(d_model= hidden_dim, nhead=16, batch_first = True)
+        encoder_layer = nn.TransformerEncoderLayer(d_model= emb_dim, dim_feedforward = 512,  nhead=16, batch_first = True)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
         self.softmax = nn.Softmax(dim = -1)
         self.mambaModel =transformer_encoder.to(device)
@@ -68,15 +68,15 @@ class TransformerCross(nn.Module):
         res = torch.zeros(n_q, B, T, self.emb_dim).to(self.device) ### [n_q, B, T, H]
         for i, layer in enumerate(self.embedding_layers):
             res[i] = layer(emb[i])
-        # res = self.embed(emb) # [n_q, B, T, H]
+        # res = self.embed(emb) # [n_q, B, T, H] weight (parameter), softmax
         res = res.sum(dim=0) #[B,T,emb]
         B, T, E = res.shape ## [n_q, B， T， H]
         res = self.mambaModel(res) # [B, T, E]
-        result = [   l(res)   for l in self.linear_layers ] ## [n_q, B, T, H]
+        result = [   l(res)   for l in self.linear_layers ] ## [n_q, B, T, K]
         result = rearrange(result, "n b t h -> n b t h")
         result = rearrange(result, "n b t h -> b n t h")
         result = self.softmax(result) 
-        return res # [B,n_q, T, K ]
+        return result # [B,n_q, T, K ]
 
     def decode(self, emb):
         """
