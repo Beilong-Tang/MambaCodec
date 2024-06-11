@@ -48,7 +48,9 @@ class CrossEntropyTrainer():
         for batch, (mix_audio, clean_audio) in enumerate(tr_data):
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             ## true
-            true_index = self.model.encode(clean) ##[n_q, B, T]
+            with torc.no_grad():
+                true_index = self.model.encode(clean) ##[n_q, B, T]
+            optim.zero_grad()
             
             ## mix
             input_emb = self.model.encode(mix) ##[n_q,B,T]
@@ -64,8 +66,8 @@ class CrossEntropyTrainer():
             self.tr_loss[epoch] = loss.item()
             if batch % self.log_interval == 0:
                 true_audio = self.model.decode(true_index.permute(1,2,0)) # [B, T, n_q]
-                output_argmax = torch.argmax(output_y.permute(0,2,1,3), dim = -1) # [B, T, n_q, K] => [B,T,n_q]
-                output_audio = self.model.decode(output_argmax) # [B,T]
+                output_argmax = torch.argmax(output_y, dim = -1) # [B, n_q,T ]
+                output_audio = self.model.decode(output_argmax.permute(0,2,1)) # [B,T]
                 si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
                 loss, current = loss.item(), (batch + 1) * len(mix_audio)
                 logger.info(f"epoch {epoch}, tr loss: {loss:>.7f}, si snr loss: {si_snr_loss:>.7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")

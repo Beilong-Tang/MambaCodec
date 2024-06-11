@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import sys 
 import logging 
-from einops import rearrange
 logger = logging.getLogger(__name__)
 
 ### add funcodec path
@@ -36,11 +35,12 @@ class TransformerCross(nn.Module):
         out_dim = 1024
         self.emb_dim = 128
         self.embedding_layers = nn.ModuleList([ nn.Embedding(out_dim, emb_dim).to(self.device) for _ in range(0,32)])
-        self.linear_layers = nn.ModuleList([ nn.Linear(emb_dim, hidden_dim) for _ in range(0,32) ])
+        self.softmax = nn.ModuleList([ nn.Linear(emb_dim, hidden_dim) for _ in range(0,32) ])
         # self.embed = nn.Embedding(out_dim, hidden_dim)
         # self.linear = nn.Linear(hidden_dim, out_dim)
         encoder_layer = nn.TransformerEncoderLayer(d_model= hidden_dim, nhead=16, batch_first = True)
-        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
+        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=3)
+        self.mambaModel2 = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= hidden_dim, nhead= 16, batch_first = True), num_layers= 3)
         self.softmax = nn.Softmax(dim = -1)
         self.mambaModel =transformer_encoder.to(device)
         for param in self.speech2Token.parameters():
@@ -69,13 +69,18 @@ class TransformerCross(nn.Module):
         for i, layer in enumerate(self.embedding_layers):
             res[i] = layer(emb[i])
         # res = self.embed(emb) # [n_q, B, T, H]
-        res = res.sum(dim=0) #[B,T,emb]
-        B, T, E = res.shape ## [n_q, B， T， H]
-        res = self.mambaModel(res) # [B, T, E]
-        result = [   l(res)   for l in self.linear_layers ] ## [n_q, B, T, H]
-        result = rearrange(result, "n b t h -> n b t h")
-        result = rearrange(result, "n b t h -> b n t h")
-        result = self.softmax(result) 
+
+        n_q, B, T, H = res.shape ## [n_q, B， T， H]
+
+        res = res.reshape(n_q * B, T, H)
+        res = self.mambaModel(res) # [n_q *B, T, H]
+        res = res.reshape(n_q, B, T, H) # [n_q, B, T, H]
+        res = res.reshape(B * T, n_q, H) # [B*T, n_q, H]
+        res = self.mambaModel2(res) # [B*T, n_q, H]
+        res = res.reshape(B, T, n_q, H)
+        res = res.permute(0,2,1,3) # [B, n_q, T, H]
+        # res = self.linear(res) # [B,n_q, T, K]
+        # res = self.softmax(res) # [B, n_q, T, K]
         return res # [B,n_q, T, K ]
 
     def decode(self, emb):

@@ -60,7 +60,7 @@ class SelmTrainer():
             ## mix
             input_emb = self.model.encode(mix)
             input_token = self.model.tokenize(input_emb)
-            input_prob = self.model.mamba(input_token)
+            input_prob = self.model.mamba(input_token) # [B,T, C]
             input_prob_max = torch.argmax(input_prob, dim = -1)
             input_detokenize = self.model.detokenize(input_prob_max)
             output_audio = self.model.decode(input_detokenize).squeeze(1)

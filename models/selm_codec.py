@@ -168,8 +168,28 @@ class SelmCodec(nn.Module):
             - the reconstructed wav (B, 1,  T'') (the wav might be a bit longer than the original one)
         """
         return self.speech2Token.decode_emb(emb)
+    
+    @torch.no_grad()
+    def inference(self, mix, clean):
+        """
+        inference mix and the clean (T)
+        return output and clean [T']
+        """
+        true_emb = self.encode(clean)
+        true_token = self.tokenize(true_emb)
+        true_audio = self.decode(true_emb).squeeze(1)
 
-    pass
+        input_emb = self.encode(mix)
+        input_token = self.tokenize(input_emb)
+        input_prob = self.mamba(input_token)
+        input_prob_max = torch.argmax(input_prob, dim = -1)
+        input_detokenize = self.detokenize(input_prob_max)
+        output_audio = self.decode(input_detokenize).squeeze(1)
+        return output_audio, true_audio
+
+
+
+        pass
 
 class MambaBlocks(nn.Module):
     def __init__(self, num, d_model, d_state, d_conv, expand):

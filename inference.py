@@ -31,10 +31,7 @@ def main(args):
     with torch.no_grad():
         for idx,(mix, clean) in tqdm.tqdm(enumerate(subset), total = args.num):
             mix, clean = mix.to(args.device).unsqueeze(0), clean.to(args.device).unsqueeze(0)
-            output_emb = model.encode(mix)
-            output_y =model.mamba(output_emb)
-            audio = model.decode(output_y).squeeze(0)
-            true_audio = model.decode(model.encode(clean)).squeeze(0)
+            audio, true_audio = model.inference(mix, clean)
             torchaudio.save(os.path.join(output_path,f"{idx}_true.wav"), true_audio.cpu(), config['model']['sampling_rate'])
             torchaudio.save(os.path.join(output_path,f"{idx}_output.wav"),audio.cpu(), config['model']['sampling_rate'])
             torchaudio.save(os.path.join(output_path,f"{idx}_mix.wav"),mix.cpu(), config['model']['sampling_rate'])

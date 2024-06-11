@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from einops import rearrange
 def si_snr_loss_fn(output, target):
     """
     calculate si_snr loss on output audio and target audio
@@ -84,16 +85,18 @@ kl_loss = torch.nn.KLDivLoss(reduce="batchmean")
 
 def kl_div_loss_fn(src, tgt):
     """
+    this class is rn a cross entropy loss
     src : [B, T, C]
     tgt : [B, T]
     """
-    src_ = torch.log_softmax(src, dim = -1)
-    tgt_ = torch.nn.functional.one_hot(tgt, src.shape[-1]).to(src.dtype) # [B, T, C]
-    return kl_loss(src_, tgt_)
+    # src_ = torch.log_softmax(src, dim = -1)
+    # tgt_ = torch.nn.functional.one_hot(tgt, src.shape[-1]).to(src.dtype) # [B, T, C]
+    # return kl_loss(src_, tgt_)
+    src_ = rearrange(src, "b t c -> b c t")
+    return crossEntropyLoss(src_, tgt)
 
 def selm_loss_fn():
     """
     return kl div loss as well as the mse loss
-
     """
     return kl_div_loss_fn, mse_loss_fn
