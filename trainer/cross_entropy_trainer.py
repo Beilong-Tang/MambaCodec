@@ -48,7 +48,7 @@ class CrossEntropyTrainer():
         for batch, (mix_audio, clean_audio) in enumerate(tr_data):
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             ## true
-            with torc.no_grad():
+            with torch.no_grad():
                 true_index = self.model.encode(clean) ##[n_q, B, T]
             optim.zero_grad()
             
