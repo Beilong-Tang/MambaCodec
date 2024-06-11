@@ -14,16 +14,16 @@ model:
   
 data:
   name: LibriMix # have to be in [WHAM, or LibriMix ]
-  type: noise # [noise, target]
-  length: 64000 # 4 second x 16000 sample rate
+  type: target # [noise, target]
+  length: 32000 # 4 second x 8000 sample rate
   tr: 
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
-    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/train-clean-360/mix.scp
+    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/train-clean-360/s1.scp
   cv:
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/mix.scp
     source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
   tt:
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/mix.scp
     source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
 batch_size: 16
 epoch: 100
@@ -35,4 +35,4 @@ optim:
     lr: 0.001
     weight_decay: 0
 
-loss: mse # [Sisnr, Mse, Cos]
+loss: Cos # [Sisnr, Mse, Cos]

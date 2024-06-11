@@ -1,0 +1,38 @@
+codec:
+  model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/model.pth
+  config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/config.yaml
+model:
+  type: MambaCodec
+  mamba_num: 6
+  d_model: 128
+  d_state: 128
+  d_conv: 4
+  expand: 2
+  sampling_rate: 8000
+  bypass_quantizer: False
+  
+  
+data:
+  name: WHAM # have to be in [WHAM, ]
+  length: 32000 # 4 second x 8000 sample rate
+  tr: 
+    mix: /DKUdata/tangbl/MambaCodec/data/wham/tr/mix.scp
+    source: /DKUdata/tangbl/MambaCodec/data/wham/tr/s.scp
+  cv:
+    mix: /DKUdata/tangbl/MambaCodec/data/wham/cv/mix.scp
+    source: /DKUdata/tangbl/MambaCodec/data/wham/cv/s.scp
+  tt:
+    mix: /DKUdata/tangbl/MambaCodec/data/wham/tt/mix.scp
+    source: /DKUdata/tangbl/MambaCodec/data/wham/tt/s.scp
+
+batch_size: 16
+epoch: 100
+log_interval: 10 ## every 10 batches
+
+optim:
+  type: Adam
+  args:
+    lr: 0.001
+    weight_decay: 0
+
+loss: Cos # [Sisnr, Mse, Cos]
