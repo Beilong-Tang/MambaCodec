@@ -95,25 +95,27 @@ class SelmTrainer():
         si_snr_loss_total = 0
         kl_div_loss_total = 0
         with torch.no_grad():
-            true_emb = self.model.encode_true(clean)
-            true_token = self.model.tokenize(true_emb) # [B, T]
-            true_audio = self.model.decode_true(true_emb).squeeze(1)
-            self.model.train()
-            ## mix
-            input_emb = self.model.encode(mix)
-            ## train encoder
-            mse_loss_total += self.mse_loss_fn(input_emb, true_emb).item()
-            input_token = self.model.tokenize(input_emb) #[B,T]
-            input_prob = self.model.mamba(input_token) # [B,T, C]
-            input_prob_max = torch.argmax(input_prob, dim = -1) #[B,T]
-            input_detokenize = self.model.detokenize(input_prob_max) #[B, T, E]
-            output_audio = self.model.decode_true(input_detokenize).squeeze(1) # output audio [B,T]
-            si_snr_loss_total += si_snr_loss_fn(output_audio, true_audio)
-            ### multi-task learning
-            # 1. kl_div loss
-            kl_div_loss_total  += self.kl_div_loss_fn(input_prob, true_token).item()
-            # 2. mse loss
-            mse_loss_de_total += self.mse_loss_fn(input_detokenize, true_emb).item()
+            for batch, (mix_audio, clean_audio) in enumerate(cv_data):
+                mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
+                true_emb = self.model.encode_true(clean)
+                true_token = self.model.tokenize(true_emb) # [B, T]
+                true_audio = self.model.decode_true(true_emb).squeeze(1)
+                self.model.train()
+                ## mix
+                input_emb = self.model.encode(mix)
+                ## train encoder
+                mse_loss_total += self.mse_loss_fn(input_emb, true_emb).item()
+                input_token = self.model.tokenize(input_emb) #[B,T]
+                input_prob = self.model.mamba(input_token) # [B,T, C]
+                input_prob_max = torch.argmax(input_prob, dim = -1) #[B,T]
+                input_detokenize = self.model.detokenize(input_prob_max) #[B, T, E]
+                output_audio = self.model.decode_true(input_detokenize).squeeze(1) # output audio [B,T]
+                si_snr_loss_total += si_snr_loss_fn(output_audio, true_audio)
+                ### multi-task learning
+                # 1. kl_div loss
+                kl_div_loss_total  += self.kl_div_loss_fn(input_prob, true_token).item()
+                # 2. mse loss
+                mse_loss_de_total += self.mse_loss_fn(input_detokenize, true_emb).item()
         mse_loss_avg= mse_loss_total / len(cv_data)
         mse_loss_de_avg = mse_loss_de_total / len(cv_data)
         si_snr_loss_avg = si_snr_loss_total / len(cv_data)
