@@ -63,7 +63,7 @@ class TransformerCross(nn.Module):
         Args:
             emb: the index produced by the encode process (n_q, B, T)
         Returns:
-            - the possibility after mamba layers (B,n_q,T,K)
+            - the possibility after mamba layers (B,T,n_q,K)
         """ 
         n_q, B, T = emb.shape
         res = torch.zeros(n_q, B, T, self.emb_dim).to(self.device) ### [n_q, B, T, H]
@@ -76,7 +76,7 @@ class TransformerCross(nn.Module):
         result = [   l(res)   for l in self.linear_layers ] ## [n_q, B, T, K]
         result = rearrange(result, "n b t h -> n b t h")
         result = rearrange(result, "n b t h -> b n t h")
-        # result = self.softmax(result) 
+        result = self.softmax(result) 
         return result # [B,n_q, T, K ]
 
     def decode(self, emb):

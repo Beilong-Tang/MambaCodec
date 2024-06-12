@@ -77,8 +77,8 @@ def cross_entropy_loss_fn(src, tgt):
     src with shape (B, n_q, T, K)
     tgt with shape (n_q, B, T)
     """
-    src_ = src.permute(0, 3, 2, 1) # [B, K , T, n_q]
-    tgt_ = tgt.permute(1, 2, 0) # [B, T, n_q]
+    src_ = rearrange(src, "b n t k -> (b n) k t") # [b *n, k, t]
+    tgt_ = rearrange(tgt, "n b t -> (n b) t") #[b*n t]
     return crossEntropyLoss(src_, tgt_)
 
 kl_loss = torch.nn.KLDivLoss(reduce="batchmean")

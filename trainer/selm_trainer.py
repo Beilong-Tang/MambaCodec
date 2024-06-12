@@ -52,18 +52,23 @@ class SelmTrainer():
             ## true
             self.model.eval()
             with torch.no_grad():
-                true_emb = self.model.encode(clean)
-                true_token = self.model.tokenize(true_emb)
-                true_audio = self.model.decode(true_emb).squeeze(1)
+                true_emb = self.model.encode_true(clean)
+                true_token = self.model.tokenize(true_emb) # [B, T]
+                true_audio = self.model.decode_true(true_emb).squeeze(1)
             optim.zero_grad()
             self.model.train()
             ## mix
             input_emb = self.model.encode(mix)
-            input_token = self.model.tokenize(input_emb)
+            ## train encoder
+            mse_loss= self.mse_loss_fn(input_emb, true_emb)
+            mse_loss.backward()
+            optim.step()
+            optim.zero_grad()
+            input_token = self.model.tokenize(input_emb) #[B,T]
             input_prob = self.model.mamba(input_token) # [B,T, C]
-            input_prob_max = torch.argmax(input_prob, dim = -1)
-            input_detokenize = self.model.detokenize(input_prob_max)
-            output_audio = self.model.decode(input_detokenize).squeeze(1)
+            input_prob_max = torch.argmax(input_prob, dim = -1) #[B,T]
+            input_detokenize = self.model.detokenize(input_prob_max) #[B, T, E]
+            output_audio = self.model.decode_true(input_detokenize).squeeze(1) # output audio [B,T]
             ### multi-task learning
             # 1. kl_div loss
             kl_div_loss = self.kl_div_loss_fn(input_prob, true_token)
@@ -86,31 +91,37 @@ class SelmTrainer():
         self.model.eval()
         loss_dict = {}
         mse_loss_total = 0 
+        mse_loss_de_total = 0
         si_snr_loss_total = 0
         kl_div_loss_total = 0
         with torch.no_grad():
-            for mix_audio, clean_audio in cv_data:
-                mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
-                ## clean
-                true_emb = self.model.encode(clean)
-                true_token = self.model.tokenize(true_emb)
-                true_audio = self.model.decode(true_emb).squeeze(1)
-                ## mix
-                input_emb = self.model.encode(mix)
-                input_token = self.model.tokenize(input_emb)
-                input_prob = self.model.mamba(input_token)
-                input_prob_max = torch.argmax(input_prob, dim = -1)
-                input_detokenize = self.model.detokenize(input_prob_max)
-                output_audio = self.model.decode(input_detokenize).squeeze(1)
-                kl_div_loss_total +=self.kl_div_loss_fn(input_prob, true_token).item()
-                mse_loss_total += self.mse_loss_fn(input_detokenize, true_emb).item()
-                si_snr_loss_total += si_snr_loss_fn(output_audio, true_audio).item()
+            true_emb = self.model.encode_true(clean)
+            true_token = self.model.tokenize(true_emb) # [B, T]
+            true_audio = self.model.decode_true(true_emb).squeeze(1)
+            self.model.train()
+            ## mix
+            input_emb = self.model.encode(mix)
+            ## train encoder
+            mse_loss_total += self.mse_loss_fn(input_emb, true_emb).item()
+            input_token = self.model.tokenize(input_emb) #[B,T]
+            input_prob = self.model.mamba(input_token) # [B,T, C]
+            input_prob_max = torch.argmax(input_prob, dim = -1) #[B,T]
+            input_detokenize = self.model.detokenize(input_prob_max) #[B, T, E]
+            output_audio = self.model.decode_true(input_detokenize).squeeze(1) # output audio [B,T]
+            si_snr_loss_total += si_snr_loss_fn(output_audio, true_audio)
+            ### multi-task learning
+            # 1. kl_div loss
+            kl_div_loss_total  += self.kl_div_loss_fn(input_prob, true_token).item()
+            # 2. mse loss
+            mse_loss_de_total += self.mse_loss_fn(input_detokenize, true_emb).item()
         mse_loss_avg= mse_loss_total / len(cv_data)
+        mse_loss_de_avg = mse_loss_de_total / len(cv_data)
         si_snr_loss_avg = si_snr_loss_total / len(cv_data)
         kl_div_loss_avg  = kl_div_loss_total / len(cv_data)
         logger.info("cross validation....")
-        logger.info(f"epoch {epoch}, cv kl loss: {kl_div_loss_avg:>.7f}, mse loss {mse_loss_avg:>.7f} si snr loss: {si_snr_loss_avg:>.7f}")
+        logger.info(f"epoch {epoch}, cv kl loss: {kl_div_loss_avg:>.7f}, mse loss {mse_loss_avg:>.7f}, mse de loss {mse_loss_de_avg :>.7f} si snr loss: {si_snr_loss_avg:>.7f}")
         loss_dict['mse'] = mse_loss_avg
+        loss_dict['mse_de'] = mse_loss_de_avg
         loss_dict['si_snr'] = si_snr_loss_avg
         loss_dict['kl_div'] = kl_div_loss_avg
         self.cv_loss[epoch] = loss_dict

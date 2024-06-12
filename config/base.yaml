@@ -1,6 +1,6 @@
 codec:
-  model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/model.pth
-  config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/config.yaml
+  model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-en-libritts-16k-nq32ds640-pytorch/model.pth
+  config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-en-libritts-16k-nq32ds640-pytorch/config.yaml
 model:
   type: MambaCodec
   mamba_num: 6
@@ -8,7 +8,7 @@ model:
   d_state: 128
   d_conv: 4
   expand: 2
-  sampling_rate: 8000
+  sampling_rate: 16000
   bypass_quantizer: False
   
   

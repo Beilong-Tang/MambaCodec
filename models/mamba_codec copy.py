@@ -31,8 +31,18 @@ class MambaCodec(nn.Module):
 
         encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first = True)
         # transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12, d_model = 128)
-        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
-        self.mambaModel = transformer_encoder.to(device)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
+        self.mambaModel =transformer_encoder.to(device)
+        self.linear = nn.Linear(emb_dim, d_model) # [128 -> 512]
+        self.mambaModel =  MambaBlocks(
+            # This module uses roughly 3 * expand * d_model^2 parameters
+            num = mamba_num,
+            d_model=d_model, # Model dimension d_model
+            d_state=d_state,  # SSM state expansion factor
+            d_conv=d_conv,    # Local convolution width
+            expand=expand,    # Block expansion factor
+            ).to(device)
+        self.linear2 = nn.Linear(d_model, emb_dim)
         ## freeze model parameters
         for param in self.speech2Token.parameters():
             param.requires_grad = False
@@ -55,6 +65,10 @@ class MambaCodec(nn.Module):
         Returns:
             - the embedding after mamba layers (B, T', emb_dim)
         """
+        res = self.transformer_encoder(emb)
+        res = self.linear(emb)
+        res = self.mambaModel(res)
+        res = self.linear2(res)
         return self.mambaModel(emb)
 
     def decode(self, emb):

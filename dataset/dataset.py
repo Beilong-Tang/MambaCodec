@@ -48,27 +48,28 @@ class WhamDataset(Dataset):
         mix_audio, clean_audio = clip_wav(mix_audio, clean_audio, self.length)
         return mix_audio, clean_audio # reduce the multi-channel to single-channel audio by only considering the first channel
 
-class LibriMix(Dataset):
+class LibriMixDataset(Dataset):
     def __init__(self, mix_path, source_path, length, mode = "noise"):
         """
         Here the mix_length and source_path is the same, the source_path does not matter here due to the quality of the dataset.
         mode can be either noise or target
         """
-        self.mix = []
+        self.noise = []
         self.source = [] 
         with open(mix_path,"r") as f:
             lines = f.readlines()
             for l in lines:
-                self.mix.append(l.replace("\n","").split(" ")[-1])
-                self.source.append(l.replace("\n","").replace("s1","noise").split(" ")[-1])
+                self.source.append(l.replace("\n","").split(" ")[-1])
+                self.noise.append(l.replace("\n","").replace("s1","noise").split(" ")[-1])
         self.length = length
         
     def __len__(self):
-        return len(self.mix)
+        return len(self.source)
 
     def __getitem__(self, idx):
-        mixaudio, _ = torchaudio.load(self.mix[idx])
-        cleanaudio, _ = torchaudio.load(self.source[idx])
+        noise_audio, _ = torchaudio.load(self.noise[idx])
+        clean_audio, _ = torchaudio.load(self.source[idx])
+        mix_audio = noise_audio + clean_audio
         mix_audio = rearrange(mix_audio, "1 t -> t")
         clean_audio = rearrange(clean_audio, "1 t -> t")
         mix_audio, clean_audio = clip_wav(mix_audio, clean_audio, self.length)
@@ -99,10 +100,10 @@ def load_wham_dataset(config, mode = "train"):
 
 def load_librimix_dataset(config, mode = "train"):
     if mode == "train":
-
-
-        pass
+        tr_path = config['data']['tr']
+        cv_path = config['data']['cv']
+        return (LibriMixDataset(tr_path['mix'], tr_path['source'], config['data']['length']),
+                LibriMixDataset(cv_path['mix'], cv_path['source'], config['data']['length']))
     elif mode == "inference":
-        pass
-    pass
-
+        raise Exception("inference not implemented for loading librimix dataset")
+    raise Exception("loading dataset not implemented")

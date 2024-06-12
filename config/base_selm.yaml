@@ -1,6 +1,6 @@
 codec:
-  model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/model.pth
-  config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-zh_en-general-16k-nq32ds640-pytorch/config.yaml
+  model_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-en-libritts-16k-nq32ds640-pytorch/model.pth
+  config_path: /DKUdata/tangbl/FunCodec/egs/LibriTTS/codec/exp/audio_codec-encodec-en-libritts-16k-nq32ds640-pytorch/config.yaml
   bypass_quantizer: True
 
 model:
@@ -13,17 +13,18 @@ model:
   sampling_rate: 16000
   
 data:
-  name: WHAM # have to be in [WHAM, ]
-  length: 32000 # 4 second x 8000 sample rate
+  name: LibriMix # have to be in [WHAM, or LibriMix ]
+  type: noise # [noise, target]
+  length: 64000 # 4 second x 16000 sample rate
   tr: 
-    mix: /DKUdata/tangbl/MambaCodec/data/wham/tr/mix.scp
-    source: /DKUdata/tangbl/MambaCodec/data/wham/tr/s.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
+    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
   cv:
-    mix: /DKUdata/tangbl/MambaCodec/data/wham/cv/mix.scp
-    source: /DKUdata/tangbl/MambaCodec/data/wham/cv/s.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
+    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
   tt:
-    mix: /DKUdata/tangbl/MambaCodec/data/wham/tt/mix.scp
-    source: /DKUdata/tangbl/MambaCodec/data/wham/tt/s.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
+    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
 
 batch_size: 16
 epoch: 100
@@ -32,7 +33,7 @@ log_interval: 10 ## every 10 batches
 optim:
   type: Adam
   args:
-    lr: 0.0005
+    lr: 0.001
     weight_decay: 0
 
 loss: selm # [Sisnr, Mse, Cos]

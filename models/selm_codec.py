@@ -96,26 +96,39 @@ class SelmCodec(nn.Module):
                 emb_dim = 128, ### Not sure about it yet
                 device = "cpu", 
                 bypass_quantizer = False, 
-                sampling_rate = 8000,
+                sampling_rate = 16000,
                 **kwargs
                 ):
         super().__init__()
-        self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
-
+        ## true
+        self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer = True, sampling_rate = sampling_rate)
+        self.speech2TokenIndex = Speech2Token(config_path, model_path, device = device, bypass_quantizer = False, sampling_rate = sampling_rate)
+        ## trainable
+        self.codec = Speech2Token(config_path, model_path, device = device, bypass_quantizer =True, sampling_rate = sampling_rate)
         ## kmeans parameter
         self.kmeans_cluster = 300
         self.kmeans_iter = 10
         self.across_batch = True
         self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 512)
         self.lookup = nn.Embedding(self.kmeans_cluster, emb_dim)
-        self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
+        # self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
         for param in self.speech2Token.parameters():
+            param.requires_grad = False
+        for param in self.speech2TokenIndex.parameters():
             param.requires_grad = False
         mamba_param_num = sum(p.numel() for p in self.mambaModel.parameters())
         logger.info(f"mamba parameters {mamba_param_num}")
     
+    def encode(self,x):
+        """
+        Args:
+            x: input speech with shape (B, T)
+        Returns:
+            - embeddings after encoding with shape (B, T', emb_dim)
+        """
+        return self.codec.encode(x)
     
-    def encode(self, x):
+    def encode_true(self, x):
         """
         Args:
             x: input speech with shape (B, T)
@@ -160,7 +173,7 @@ class SelmCodec(nn.Module):
         res = self.conformer(res, torch.full((res.shape[0],),res.shape[1]).to(res.device)) # [B, T, E]
         return res[0]
 
-    def decode(self, emb):
+    def decode_true(self, emb):
         """
         Args:
             emb: the embedding to be decoded
@@ -175,21 +188,16 @@ class SelmCodec(nn.Module):
         inference mix and the clean (T)
         return output and clean [T']
         """
-        true_emb = self.encode(clean)
-        true_token = self.tokenize(true_emb)
-        true_audio = self.decode(true_emb).squeeze(1)
+        true_emb = self.encode_true(clean) # (B, T', emb_dim)
+        true_audio = self.decode_true(true_emb).squeeze(1) # [T']
 
-        input_emb = self.encode(mix)
-        input_token = self.tokenize(input_emb)
-        input_prob = self.mamba(input_token)
-        input_prob_max = torch.argmax(input_prob, dim = -1)
-        input_detokenize = self.detokenize(input_prob_max)
-        output_audio = self.decode(input_detokenize).squeeze(1)
+        input_emb = self.encode(mix) # [B, T'. emb_dim]
+        input_token = self.tokenize(input_emb) # [B,T']
+        input_prob = self.mamba(input_token) # [B, T, C']
+        input_prob_max = torch.argmax(input_prob, dim = -1) # [B, T']
+        input_detokenize = self.detokenize(input_prob_max) # [B, T, E']
+        output_audio = self.decode(input_detokenize).squeeze(1) # [T']
         return output_audio, true_audio
-
-
-
-        pass
 
 class MambaBlocks(nn.Module):
     def __init__(self, num, d_model, d_state, d_conv, expand):
