@@ -4,7 +4,7 @@ codec:
   bypass_quantizer: True
 
 model:
-  type: SelmCodec
+  type: TransformerCrossTarget
   mamba_num: 6
   d_model: 128
   d_state: 128
@@ -14,16 +14,16 @@ model:
   
 data:
   name: LibriMix # have to be in [WHAM, or LibriMix ]
-  type: noise # [noise, target]
+  type: target # [noise, target]
   length: 64000 # 4 second x 16000 sample rate
   tr: 
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/mix.scp
     source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
   cv:
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/mix.scp
     source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
   tt:
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
+    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/mix.scp
     source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
 
 batch_size: 16
@@ -36,4 +36,4 @@ optim:
     lr: 0.001
     weight_decay: 0
 
-loss: selm # [Sisnr, Mse, Cos]
+loss: CrossEntropyTarget # [Sisnr, Mse, Cos]

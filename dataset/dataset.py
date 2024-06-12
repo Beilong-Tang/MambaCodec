@@ -1,5 +1,6 @@
 import torchaudio
 import torch
+import random
 from torch.utils.data import Dataset
 from einops import rearrange
 
@@ -54,26 +55,53 @@ class LibriMixDataset(Dataset):
         Here the mix_length and source_path is the same, the source_path does not matter here due to the quality of the dataset.
         mode can be either noise or target
         """
-        self.noise = []
-        self.source = [] 
-        with open(mix_path,"r") as f:
-            lines = f.readlines()
-            for l in lines:
-                self.source.append(l.replace("\n","").split(" ")[-1])
-                self.noise.append(l.replace("\n","").replace("s1","noise").split(" ")[-1])
-        self.length = length
+        self.mode = mode
+        print(f"Libri mode is {mode}")
+        if mode == "noise":
+            self.noise = []
+            self.source = [] 
+            with open(mix_path,"r") as f:
+                lines = f.readlines()
+                for l in lines:
+                    self.source.append(l.replace("\n","").split(" ")[-1])
+                    self.noise.append(l.replace("\n","").replace("s1","noise").split(" ")[-1])
+            self.length = length
+        elif mode =="target":
+            self.mix = []
+            self.source = [] 
+            with open(mix_path,"r") as f:
+                lines = f.readlines()
+                for l in lines:
+                    self.mix.append(l.replace("\n","").split(" ")[-1])
+            with open(source_path,"r") as f:
+                lines = f.readlines()
+                for l in lines:
+                    self.source.append(l.replace("\n","").split(" ")[-1])
+            self.length = length
+            pass
+        else:
+            raise Exception ("mode error")
         
     def __len__(self):
         return len(self.source)
 
     def __getitem__(self, idx):
-        noise_audio, _ = torchaudio.load(self.noise[idx])
-        clean_audio, _ = torchaudio.load(self.source[idx])
-        mix_audio = noise_audio + clean_audio
-        mix_audio = rearrange(mix_audio, "1 t -> t")
-        clean_audio = rearrange(clean_audio, "1 t -> t")
-        mix_audio, clean_audio = clip_wav(mix_audio, clean_audio, self.length)
-        return mix_audio, clean_audio
+        if self.mode == "noise":
+            noise_audio, _ = torchaudio.load(self.noise[idx])
+            clean_audio, _ = torchaudio.load(self.source[idx])
+            mix_audio = noise_audio + clean_audio
+            mix_audio = rearrange(mix_audio, "1 t -> t")
+            clean_audio = rearrange(clean_audio, "1 t -> t")
+            mix_audio, clean_audio = clip_wav(mix_audio, clean_audio, self.length)
+            return mix_audio, clean_audio
+        elif self.mode == "target":
+            mix_audio, _ = torchaudio.load(self.mix[idx])
+            clean_audio, _ = torchaudio.load(self.source[idx])
+            tgt_audio, _ = torchaudio.load(random.choice(self.source))
+            mix_audio = rearrange(mix_audio, "1 t -> t")
+            clean_audio = rearrange(clean_audio, "1 t -> t")
+            tgt_audio = rearrange(tgt_audio, "1 t -> t")
+            return mix_audio, tgt_audio, clean_audio
     pass
 
 
@@ -102,8 +130,8 @@ def load_librimix_dataset(config, mode = "train"):
     if mode == "train":
         tr_path = config['data']['tr']
         cv_path = config['data']['cv']
-        return (LibriMixDataset(tr_path['mix'], tr_path['source'], config['data']['length']),
-                LibriMixDataset(cv_path['mix'], cv_path['source'], config['data']['length']))
+        return (LibriMixDataset(tr_path['mix'], tr_path['source'], config['data']['length'], mode = config['data']['type']),
+                LibriMixDataset(cv_path['mix'], cv_path['source'], config['data']['length'], mode = config['data']['type']))
     elif mode == "inference":
         raise Exception("inference not implemented for loading librimix dataset")
     raise Exception("loading dataset not implemented")

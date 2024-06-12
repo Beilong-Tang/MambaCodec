@@ -111,7 +111,7 @@ class SelmCodec(nn.Module):
         self.across_batch = True
         self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 512)
         self.lookup = nn.Embedding(self.kmeans_cluster, emb_dim)
-        # self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
+        self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
         for param in self.speech2Token.parameters():
             param.requires_grad = False
         for param in self.speech2TokenIndex.parameters():

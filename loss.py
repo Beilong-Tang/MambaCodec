@@ -81,6 +81,9 @@ def cross_entropy_loss_fn(src, tgt):
     tgt_ = rearrange(tgt, "n b t -> (n b) t") #[b*n t]
     return crossEntropyLoss(src_, tgt_)
 
+def cross_entropy_taget_loss_fn(src, tgt):
+    return crossEntropyLoss(src, tgt)
+
 kl_loss = torch.nn.KLDivLoss(reduce="batchmean")
 
 def kl_div_loss_fn(src, tgt):
