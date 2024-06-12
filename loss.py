@@ -82,7 +82,7 @@ def cross_entropy_loss_fn(src, tgt):
     return crossEntropyLoss(src_, tgt_)
 
 def cross_entropy_taget_loss_fn(src, tgt):
-    return crossEntropyLoss(src, tgt)
+    return cross_entropy_loss_fn
 
 kl_loss = torch.nn.KLDivLoss(reduce="batchmean")
 
