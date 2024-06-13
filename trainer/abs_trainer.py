@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class AbsTrainer():
 
-     def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
+    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
         self.model = model 
         self.tr_data = tr_data
         self.cv_data = cv_data
