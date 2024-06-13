@@ -45,7 +45,7 @@ def cleanup():
     dist.destroy_process_group()
 
 
-def main(rank, world_size, args, device_array, logger):
+def main(rank, world_size, args):
     ## set up logger
     now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
     log_dir = f"./logs/{args.name}"
@@ -100,7 +100,7 @@ if __name__ =="__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = ",".join([str(i) for i in device_array])
     world_size = len(device_array)
     mp.spawn(main,
-             args=(world_size, args, device_array),
+             args=(world_size, args),
              nprocs=world_size,
              join=True)
     pass

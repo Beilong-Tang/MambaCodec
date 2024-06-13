@@ -48,7 +48,6 @@ class AbsTrainer():
         pass
     
     def _log(self, msg):
-        self.logger.info(self.device)
         if self.device == 0 :
             self.logger.info(msg)
         pass
@@ -64,8 +63,5 @@ class AbsTrainer():
             ### save model 
             self._save(self.model, self.tr_loss, self.cv_loss, epoch, self.optim, os.path.join(self.ckpt_path, self.name, f"epoch{epoch}.pth"))
             dist.barrier()
-    
-    
-
     pass
 

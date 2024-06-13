@@ -6,7 +6,6 @@ import time
 from loss import si_snr_loss_fn
 import torch.distributed as dist
 from abs_trainer import AbsTrainer
-logger = logging.getLogger(__name__)
 
 
 class SelmTrainer(AbsTrainer):
@@ -55,7 +54,7 @@ class SelmTrainer(AbsTrainer):
             if batch % self.log_interval == 0:
                 si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
                 loss, current = si_snr_loss, (batch + 1) * len(mix_audio)
-                logger.info(f"epoch {epoch}, tr kl loss: {kl_div_loss.item():>.7f}, mse loss {mse_loss.item():>.7f} si snr loss: {loss:>.7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")
+                self._log(f"epoch {epoch}, tr kl loss: {kl_div_loss.item():>.7f}, mse loss {mse_loss.item():>.7f} si snr loss: {loss:>.7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")
                 start_time = time.time()
     
     def _eval(self, loss_fn, cv_data, epoch):
@@ -91,8 +90,8 @@ class SelmTrainer(AbsTrainer):
         mse_loss_de_avg = mse_loss_de_total / len(cv_data)
         si_snr_loss_avg = si_snr_loss_total / len(cv_data)
         kl_div_loss_avg  = kl_div_loss_total / len(cv_data)
-        logger.info("cross validation....")
-        logger.info(f"epoch {epoch}, cv kl loss: {kl_div_loss_avg:>.7f}, mse loss {mse_loss_avg:>.7f}, mse de loss {mse_loss_de_avg :>.7f} si snr loss: {si_snr_loss_avg:>.7f}")
+        self._log("cross validation....")
+        self._log(f"epoch {epoch}, cv kl loss: {kl_div_loss_avg:>.7f}, mse loss {mse_loss_avg:>.7f}, mse de loss {mse_loss_de_avg :>.7f} si snr loss: {si_snr_loss_avg:>.7f}")
         loss_dict['mse'] = mse_loss_avg
         loss_dict['mse_de'] = mse_loss_de_avg
         loss_dict['si_snr'] = si_snr_loss_avg
