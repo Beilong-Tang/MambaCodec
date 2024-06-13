@@ -19,7 +19,25 @@ def clip_wav(mix_audio, clean_audio, length):
         clean_audio = clean_audio[:length]
     return mix_audio, clean_audio
 
-    pass
+def clip_wav_tgt(mix_audio, tgt_audio, clean_audio, length):
+    """
+    mix_audio and clean audio have shape [T]
+    clip the audio to the certain length,
+    """
+    if tgt_audio.size(0) > length:
+        tgt_audio = tgt_audio[:length]
+    elif tgt_audio.size(0) < length:
+        pad_tensor = torch.zeros(length - tgt_audio.size(0))
+        tgt_audio = torch.cat([tgt_audio, pad_tensor])
+
+    if mix_audio.size(0) <length:
+        pad_tensor = torch.zeros(length - mix_audio.size(0))
+        clean_audio = torch.cat([clean_audio, pad_tensor])
+        mix_audio = torch.cat([mix_audio, pad_tensor])
+    elif mix_audio.size(0) > length:
+        mix_audio = mix_audio[:length]
+        clean_audio = clean_audio[:length]
+    return mix_audio, tgt_audio, clean_audio
 
 class WhamDataset(Dataset):
     def __init__(self, mix_path, source_path, length):
@@ -100,8 +118,8 @@ class LibriMixDataset(Dataset):
             tgt_audio, _ = torchaudio.load(random.choice(self.source))
             mix_audio = rearrange(mix_audio, "1 t -> t")
             clean_audio = rearrange(clean_audio, "1 t -> t")
-            tgt_audio = rearrange(tgt_audio, "1 t -> t")
-            return mix_audio, tgt_audio, clean_audio
+            tgt_audio = rearrange(tgt_audio, "1 t -> t")[:self.length]
+            return clip_wav_tgt(mix_audio, tgt_audio, clean_audio, self.length)
     pass
 
 

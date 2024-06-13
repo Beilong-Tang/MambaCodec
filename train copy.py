@@ -9,11 +9,6 @@ import numpy as np
 import logging 
 import datetime
 
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data.distributed import DistributedSampler
-import torch.multiprocessing as mp
-import torch.distributed as dist
-
 ###
 from torch.utils.data import DataLoader
 
@@ -33,41 +28,23 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 torch.cuda.manual_seed_all(SEED)
 
-## ddp process
-def setup(rank, world_size):
-    os.environ['MASTER_ADDR'] = '127.0.0.1'
-    os.environ['MASTER_PORT'] = '12355'
-
-    # initialize the process group
-    dist.init_process_group("gloo", rank=rank, world_size=world_size)
-
-def cleanup():
-    dist.destroy_process_group()
-
-
-def main(rank, world_size, args):
-    print(f"rank {rank}")
-    setup(rank,world_size)
-    # Set the CUDA device based on local_rank
-    torch.cuda.set_device(rank)
-    torch.cuda.empty_cache()
-
+def main(args):
     with open(args.config_path, "r") as f:
         config = yaml.safe_load(f)
 
     ### prepare dataset
     tr_dataset, cv_dataset = load_dataset(config)
-    tr_data = DataLoader(tr_dataset, batch_size = config['batch_size'],shuffle = False, sampler = DistributedSampler(dataset=train_dataset))
-    cv_data = DataLoader(cv_dataset, batch_size = config['batch_size'],shuffle = False, sampler = DistributedSampler(dataset=train_dataset))
+    tr_data = DataLoader(tr_dataset, batch_size = config['batch_size'])
+    cv_data = DataLoader(cv_dataset, batch_size = config['batch_size'])
     ### prepare model
     model_class = get_class("models", config['model']['type'])
-    model = model_class(**{**config['codec'], **config['model'], **{"device":rank}}).to(rank)
-    model = DDP(model,device_ids=[rank])
+    model = model_class(**{**config['codec'], **config['model'], **{"device":args.device}})
+    model.to(args.device)
     ### prepare optim
     optim = get_instance(torch.optim, config['optim'], model.parameters())
     ### start training loop
     trainer_class = get_class("trainer", f"{config['loss']}Trainer")
-    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, rank, get_attr(loss, config['loss'],"loss_fn"))
+    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, args.device, get_attr(loss, config['loss'],"loss_fn"))
     trainer.train()
 
     pass
@@ -91,13 +68,5 @@ if __name__ =="__main__":
     logger = logging.getLogger(__name__)
     logger.info(' '.join(sys.argv))
     ###
-
-    ### set up ddp 
-    device_array = args.device.split(",") 
-    os.environ["CUDA_VISIBLE_DEVICES"] = ",".join([str(i) for i in device_array])
-    world_size = len(device_array)
-    mp.spawn(main,
-             args=(world_size,args),
-             nprocs=world_size,
-             join=True)
+    main(args)
     pass

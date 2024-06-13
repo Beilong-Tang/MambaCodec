@@ -38,10 +38,11 @@ class TransformerCrossTarget(nn.Module):
         self.device = device
         out_dim = 1024
         self.emb_dim = 128
-        self.embedding_layers = nn.ModuleList([ nn.Embedding(out_dim, 256).to(self.device) for _ in range(0,32)])
-        self.linear2 = nn.Linear(256, 1024)
-        transformer_encoder = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= 128, dim_feedforward = 512,  nhead=16, batch_first = True),num_layers=6)
-        transformer_encoder1 = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= 128, dim_feedforward = 512,  nhead=16, batch_first = True),num_layers=6)
+        self.hidden = 256
+        self.embedding_layers = nn.ModuleList([ nn.Embedding(out_dim, self.hidden).to(self.device) for _ in range(0,32)])
+        self.linear2 = nn.Linear(self.hidden, 1024)
+        transformer_encoder = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= 128, dim_feedforward = 512,  nhead=16, batch_first = True),num_layers=3)
+        transformer_encoder1 = nn.TransformerEncoder(nn.TransformerEncoderLayer(d_model= 128, dim_feedforward = 512,  nhead=16, batch_first = True),num_layers=3)
         self.inter =transformer_encoder.to(device)
         self.intra = transformer_encoder1.to(device)
         self.conv2d = nn.Conv2d(64, 128, (3,3), padding = 1 )
@@ -66,14 +67,14 @@ class TransformerCrossTarget(nn.Module):
         Returns:
             - the possibility after mamba layers ( B,n_q, T, 1024)
         """ 
-        n_q, B, T = emb.shape
+        n_q, B, T = mix.shape
         ## embedding
-        mix_emb = torch.zeros(n_q, B, T, self.emb_dim).to(self.device) ### [n_q, B, T, e]
+        mix_emb = torch.zeros(n_q, B, T, self.hidden).to(self.device) ### [n_q, B, T, e]
         for i, layer in enumerate(self.embedding_layers):
-            res[i] = layer(mix[i])
-        tgt_emb = torch.zeros(n_q, B, T, self.emb_dim).to(self.device) ### [n_q, B, T, e]
+            mix_emb[i] = layer(mix[i])
+        tgt_emb = torch.zeros(n_q, B, T, self.hidden).to(self.device) ### [n_q, B, T, e]
         for i, layer in enumerate(self.embedding_layers):
-            res[i] = layer(tgt[i])
+            tgt_emb[i] = layer(tgt[i])
         mix_emb = rearrange(mix_emb, "n b t e -> b n t e") # [B, n_q, T, N]
         tgt_emb = rearrange(tgt_emb, "n b t e -> b n t e") # [B, n_q, T, N]
         ## concat the result
