@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class MseTrainer(AbsTrainer):
-    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
-        super().__init__(model, tr_data, cv_data, optim, config, args, device, loss_fn)
+    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn, *args):
+        super().__init__(model, tr_data, cv_data, optim, config, args, device, loss_fn, *args)
     
     def _train(self, loss_fn, optim, tr_data, epoch):
         self.model.train()

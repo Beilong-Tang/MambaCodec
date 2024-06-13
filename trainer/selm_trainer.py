@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class SelmTrainer(AbsTrainer):
-    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
-        super().__init__(model, tr_data, cv_data, optim, config, args, device, loss_fn)
+    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn,*args_):
+        super().__init__(model, tr_data, cv_data, optim, config, args, device, loss_fn,*args_)
         self.kl_div_loss_fn = loss_fn()[0]
         self.mse_loss_fn = loss_fn()[1]
     

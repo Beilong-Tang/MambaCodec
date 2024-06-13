@@ -6,12 +6,11 @@ import time
 from abs_trainer import AbsTrainer
 from loss import si_snr_loss_fn
 import torch.distributed as dist
-logger = logging.getLogger(__name__)
 
 
 class CosTrainer(AbsTrainer):
-    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
-        super().__init__(model, tr_data, cv_data, optim, config, args, device, loss_fn)
+    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn, *args_, **kwargs):
+        super().__init__(model, tr_data, cv_data, optim, config, args, device, loss_fn, *args_, **kwargs)
     
     def _train(self, loss_fn, optim, tr_data, epoch):
         self.model.train()
@@ -38,7 +37,7 @@ class CosTrainer(AbsTrainer):
                 print(true_audio.shape)
                 si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()
                 loss, current = loss.item(), (batch + 1) * len(mix_audio)
-                logger.info(f"epoch {epoch}, tr loss: {loss:>.7f}, si snr loss: {si_snr_loss:>.7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")
+                self._log(f"epoch {epoch}, tr loss: {loss:>.7f}, si snr loss: {si_snr_loss:>.7f}  [{current:>5d}/{(len(tr_data)*len(mix_audio)):>5d}], time: {(time.time() - start_time)*1000 :.2f}ms")
                 start_time = time.time()
     
     def _eval(self, loss_fn, cv_data, epoch):
@@ -60,7 +59,7 @@ class CosTrainer(AbsTrainer):
                 mse_loss_total += mse_loss
         mse_loss_avg= mse_loss_total / len(cv_data)
         si_snr_loss_avg = si_snr_loss_total / len(cv_data)
-        logger.info(f"epoch {epoch}, cv loss: {(mse_loss_avg) :>.7f}, si_snr loss: {(si_snr_loss_avg) :>7f}")
+        self._log(f"epoch {epoch}, cv loss: {(mse_loss_avg) :>.7f}, si_snr loss: {(si_snr_loss_avg) :>7f}")
         loss_dict['cos'] = mse_loss_avg
         loss_dict['si_snr'] = si_snr_loss_avg
         self.cv_loss[epoch] = loss_dict

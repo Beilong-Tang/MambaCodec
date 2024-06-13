@@ -45,10 +45,21 @@ def cleanup():
     dist.destroy_process_group()
 
 
-def main(rank, world_size, args):
+def main(rank, world_size, args, device_array, logger):
+    ## set up logger
+    now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
+    log_dir = f"./logs/{args.name}"
+    os.makedirs(log_dir, exist_ok = True)
+    logging.basicConfig(format="%(asctime)s,%(name)s,%(levelname)s,%(message)s", 
+                        datefmt= "%Y-%m-%d %H:%M:%S", filename = f"{log_dir}/{now}.log" , level= logging.INFO)
+    logger = logging.getLogger(__name__)
     print(f"rank {rank}")
+    if rank ==0:
+        logger.info(' '.join(sys.argv))
+
     setup(rank,world_size)
     # Set the CUDA device based on local_rank
+    device = rank
     torch.cuda.set_device(rank)
     torch.cuda.empty_cache()
 
@@ -57,17 +68,17 @@ def main(rank, world_size, args):
 
     ### prepare dataset
     tr_dataset, cv_dataset = load_dataset(config)
-    tr_data = DataLoader(tr_dataset, batch_size = config['batch_size'],shuffle = False, sampler = DistributedSampler(dataset=train_dataset))
-    cv_data = DataLoader(cv_dataset, batch_size = config['batch_size'],shuffle = False, sampler = DistributedSampler(dataset=train_dataset))
+    tr_data = DataLoader(tr_dataset, batch_size = config['batch_size'],shuffle = False, sampler = DistributedSampler(dataset=tr_dataset))
+    cv_data = DataLoader(cv_dataset, batch_size = config['batch_size'],shuffle = False, sampler = DistributedSampler(dataset=cv_dataset))
     ### prepare model
     model_class = get_class("models", config['model']['type'])
-    model = model_class(**{**config['codec'], **config['model'], **{"device":rank}}).to(rank)
+    model = model_class(**{**config['codec'], **config['model'], **{"device":device}}).to(device)
     model = DDP(model,device_ids=[rank])
     ### prepare optim
     optim = get_instance(torch.optim, config['optim'], model.parameters())
     ### start training loop
     trainer_class = get_class("trainer", f"{config['loss']}Trainer")
-    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, rank, get_attr(loss, config['loss'],"loss_fn"))
+    trainer = trainer_class(model, tr_data, cv_data, optim, config, args, rank, get_attr(loss, config['loss'],"loss_fn"), logger)
     trainer.train()
 
     pass
@@ -82,14 +93,6 @@ if __name__ =="__main__":
     parser.add_argument("--name", type = str, required = True)
     parser.add_argument("--ckpt_path", type = str, required = True)
     args = parser.parse_args()
-    ## set logging
-    now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S')
-    log_dir = f"./logs/{args.name}"
-    os.makedirs(log_dir, exist_ok = True)
-    logging.basicConfig(format="%(asctime)s,%(name)s,%(levelname)s,%(message)s", 
-                        datefmt= "%Y-%m-%d %H:%M:%S", filename = f"{log_dir}/{now}.log" , level= logging.INFO)
-    logger = logging.getLogger(__name__)
-    logger.info(' '.join(sys.argv))
     ###
 
     ### set up ddp 
@@ -97,7 +100,7 @@ if __name__ =="__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = ",".join([str(i) for i in device_array])
     world_size = len(device_array)
     mp.spawn(main,
-             args=(world_size,args),
+             args=(world_size, args, device_array),
              nprocs=world_size,
              join=True)
     pass

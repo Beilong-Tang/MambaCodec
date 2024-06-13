@@ -6,13 +6,12 @@ import time
 from einops import rearrange
 from loss import si_snr_loss_fn
 import torch.distributed as dist
-logger = logging.getLogger(__name__)
 
 
 class AbsTrainer():
 
-    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn):
-        self.model = model 
+    def __init__(self, model, tr_data, cv_data, optim, config, args, device, loss_fn, logger, *args_, **kwargs):
+        self.model = model.module
         self.tr_data = tr_data
         self.cv_data = cv_data
         self.config = config 
@@ -25,11 +24,12 @@ class AbsTrainer():
         self.device = device
         self.log_interval = config['log_interval']
         self.loss_fn = loss_fn
+        self.logger = logger
         os.makedirs(os.path.join(self.ckpt_path, self.name), exist_ok = True)
         if not args.continue_from ==None:
-            logger.info(f"loading model from {args.continue_from}...")
+            self._log(f"loading model from {args.continue_from}...")
             ckpt = torch.load(args.continue_from)
-            self.model.load_state_dict(ckpt['model_state_dict'])
+            self.model.module.load_state_dict(ckpt['model_state_dict'])
             self.epoch_start = ckpt['epoch']
             self.tr_loss = ckpt['tr_loss']
             self.cv_loss = ckpt['cv_loss']
@@ -47,17 +47,23 @@ class AbsTrainer():
                         'cv_loss':cv_loss }, path)
         pass
     
+    def _log(self, msg):
+        self.logger.info(self.device)
+        if self.device == 0 :
+            self.logger.info(msg)
+        pass
+    
     def train(self):
         for epoch in range(self.epoch_start, self.config['epoch']):
-            logger.info(f"...epoch {epoch}...")
-            self.tr_data.sampler.set_epoch(e)
+            self._log(f"...epoch {epoch}...")
+            self.tr_data.sampler.set_epoch(epoch)
             ### training 
             self._train(self.loss_fn, self.optim, self.tr_data, epoch)
             ### evaluation calculate mse loss as well as si_snr loss
             self._eval(self.loss_fn, self.cv_data, epoch)
-            dist.barrier()
             ### save model 
             self._save(self.model, self.tr_loss, self.cv_loss, epoch, self.optim, os.path.join(self.ckpt_path, self.name, f"epoch{epoch}.pth"))
+            dist.barrier()
     
     
 
