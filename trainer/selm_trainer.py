@@ -5,7 +5,7 @@ import os
 import time
 from loss import si_snr_loss_fn
 import torch.distributed as dist
-from abs_trainer import AbsTrainer
+from .abs_trainer import AbsTrainer
 
 
 class SelmTrainer(AbsTrainer):
@@ -47,9 +47,9 @@ class SelmTrainer(AbsTrainer):
             optim.zero_grad()
             # 2. mse loss
             mse_loss = self.mse_loss_fn(input_detokenize, true_emb)
-            mse_loss.backward()
-            optim.step()
-            optim.zero_grad()
+            # mse_loss.backward()
+            # optim.step()
+            # optim.zero_grad()
             self.tr_loss[epoch] = {"kl_div": kl_div_loss.item(), "mse": mse_loss.item()}
             if batch % self.log_interval == 0:
                 si_snr_loss = si_snr_loss_fn(output_audio, true_audio).item()

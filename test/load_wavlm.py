@@ -14,3 +14,8 @@ output = model(audio, output_hidden_states = True)
 print(output)
 
 print(output.hidden_states[5].shape)
+
+print(output.extract_features.shape)
+
+for h in output.hidden_states:
+    print(h.shape)

@@ -41,7 +41,7 @@ class AbsTrainer():
         if self.device == 0:
             print(f"saving model... for epoch {epoch}")
             torch.save({'epoch':epoch, 
-                        'model_state_dict':model.module.state_dict(),
+                        'model_state_dict':model.state_dict(),
                         'optim': optim.state_dict(),
                         'tr_loss':tr_loss,
                         'cv_loss':cv_loss }, path)

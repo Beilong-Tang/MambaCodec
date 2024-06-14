@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.nn.functional as F
 import sys 
 import logging 
 import math
@@ -110,8 +111,8 @@ class SelmCodec(nn.Module):
         self.kmeans_iter = 10
         self.across_batch = True
         self.mambaModel = LanguageModel(emb_num = self.kmeans_cluster, emb_dim = 512)
-        self.lookup = nn.Embedding(self.kmeans_cluster, emb_dim)
-        self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=31)
+        self.conformer = Conformer(input_dim=emb_dim, num_heads=4, ffn_dim= 256, num_layers= 4, depthwise_conv_kernel_size=3)
+        self.register_buffer("lookup", None)
         for param in self.speech2Token.parameters():
             param.requires_grad = False
         for param in self.speech2TokenIndex.parameters():
@@ -147,7 +148,7 @@ class SelmCodec(nn.Module):
             Remember the kmeans center as the lookup table
         """
         means, tokens = kmeans_batch(emb, self.kmeans_cluster, self.kmeans_iter, self.across_batch)
-        self.lookup = nn.Embedding.from_pretrained(means, freeze = True).to(emb.device) ## maintaining look up table
+        self.lookup = means
         return tokens
     
     def mamba(self, emb):
@@ -168,7 +169,11 @@ class SelmCodec(nn.Module):
         """
         if self.lookup == None:
             raise Exception("have to tokenize before this method!!!")
-        res = self.lookup(x) # [B, T, E]
+        if self.across_batch:
+            res = F.embedding(x, self.lookup)
+        else:
+            res = [F.embedding(e, self.lookup[i]) for i,e in enumerate(x)]
+            res = rearrange("b t e -> b t e")
         ### TODO: conformer model here
         res = self.conformer(res, torch.full((res.shape[0],),res.shape[1]).to(res.device)) # [B, T, E]
         return res[0]
@@ -236,8 +241,10 @@ class LanguageModel(nn.Module):
             y, probability with shape (B, T, C)
         """
         res = self.audio_embedding(x) # [B, T, emb_dim]
+        res = self.position_encode(res) # [B, T, emb_dim]
         res = self.transformer_encoder(res) # [B,T, emb_dim]
         res = self.linear(res) # [B, T, C]
+        res = torch.nn.functional.softmax(res, dim = -1)
         return res
 
 class PositionalEncoding(nn.Module):
@@ -257,7 +264,6 @@ class PositionalEncoding(nn.Module):
         """
         Arguments:
             x: shape [batch, T, emb_dim]
-            x: Tensor, shape ``[seq_len, batch_size, embedding_dim]``
         Return:
             [batch, T, emb_dim] after applying positional encoding
         """
