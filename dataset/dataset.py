@@ -92,15 +92,22 @@ class LibriMixDataset(Dataset):
         return len(self.source)
 
     def __getitem__(self, idx):
-        mix_audio, _ = torchaudio.load(self.mix[idx])
-        clean_audio, _ = torchaudio.load(self.source[idx])
-        tgt_audio, _ = torchaudio.load(random.choice(self.source))
-        mix_audio = rearrange(mix_audio, "1 t -> t")
-        clean_audio = rearrange(clean_audio, "1 t -> t")
-        tgt_audio = rearrange(tgt_audio, "1 t -> t")[:self.length]
-        return clip_wav_tgt(mix_audio, tgt_audio, clean_audio, self.length)
-    pass
-
+        if self.mode == "noise":
+            noise_audio, _ = torchaudio.load(self.noise[idx])
+            clean_audio, _ = torchaudio.load(self.source[idx])
+            mix_audio = noise_audio + clean_audio
+            mix_audio = rearrange(mix_audio, "1 t -> t")
+            clean_audio = rearrange(clean_audio, "1 t -> t")
+            mix_audio, clean_audio = clip_wav(mix_audio, clean_audio, self.length)
+            return mix_audio, clean_audio
+        elif self.mode == "target":
+            mix_audio, _ = torchaudio.load(self.mix[idx])
+            clean_audio, _ = torchaudio.load(self.source[idx])
+            tgt_audio, _ = torchaudio.load(random.choice(self.source))
+            mix_audio = rearrange(mix_audio, "1 t -> t")
+            clean_audio = rearrange(clean_audio, "1 t -> t")
+            tgt_audio = rearrange(tgt_audio, "1 t -> t")[:self.length]
+            return clip_wav_tgt(mix_audio, tgt_audio, clean_audio, self.length)
 
 def load_dataset(config, mode= "train"):
     if config['data']['name'] == 'WHAM':
