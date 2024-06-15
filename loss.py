@@ -103,3 +103,35 @@ def selm_loss_fn():
     return kl div loss as well as the mse loss
     """
     return kl_div_loss_fn, mse_loss_fn
+
+
+from pesq import pesq_batch
+from pystoi import stoi
+
+
+def clip_audio(output_audio, true_audio):
+    """shape of [B,T], numpy"""
+    assert output_audio.shape[0] == true_audio.shape[0]
+    output_length = output_audio.shape[1]
+    true_length = true_audio.shape[1]
+    if true_length > output_length:
+        # Pad the denoised signal with zeros to match the length of the clean signal
+        padding = np.zeros((output_audio.shape[0], true_length - output_length), dtype=output_audio.dtype)
+        output_audio = np.concatenate((output_audio, padding), axis=1)
+    elif true_length < output_length:
+        # Truncate the denoised signal to match the length of the clean signal
+        output_audio = output_audio[:,:true_length]
+    return output_audio, true_audio
+
+def pesq_fn(output, true, rate = 16000):
+    """[T]"""
+    res = pesq_batch(rate, true, output, 'wb')
+    return sum(res)/len(res)
+
+def stoi_batch_fn(output, true, rate = 16000, extended = False):
+    """[B, T]"""
+    output, true = clip_audio(output, true)
+    score = 0
+    for i in range(0,len(output)):
+        score += stoi(true[i],output[i], rate, extended)
+    return score / len(output)

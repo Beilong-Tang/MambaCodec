@@ -3,13 +3,9 @@ import torch
 import sys 
 import logging 
 logger = logging.getLogger(__name__)
+import dac 
+from audiotools import AudioSignal 
 
-### add funcodec path
-sys.path.append("/DKUdata/tangbl/FunCodec/funcodec/bin")
-### 
-
-from codec_inference import Speech2Token
-from mamba_ssm import Mamba
 
 class MambaCodec(nn.Module):
     def __init__(self, 
@@ -20,21 +16,20 @@ class MambaCodec(nn.Module):
                 d_conv,
                 expand,
                 mamba_num,
-                emb_dim = 128, ### Not sure about it yet
+                emb_dim = 1024, ### Not sure about it yet
                 device = "cpu", 
                 bypass_quantizer = False, 
                 sampling_rate = 8000,
                 **kwargs
                 ):
         super().__init__()
-        self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
-
-        encoder_layer = nn.TransformerEncoderLayer(d_model=128, nhead=8, batch_first = True)
+        self.codec = dac.DAC.load(dac.utils.download(model_type="16khz")) # 12 code books
+        encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=8, batch_first = True)
         # transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12, d_model = 128)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
         self.mambaModel = transformer_encoder.to(device)
         ## freeze model parameters
-        for param in self.speech2Token.parameters():
+        for param in self.codec.parameters():
             param.requires_grad = False
         mamba_param_num = sum(p.numel() for p in self.parameters())
         logger.info(f"mamba parameters {mamba_param_num}")
@@ -46,25 +41,28 @@ class MambaCodec(nn.Module):
         Returns:
             - embeddings after encoding with shape (B, T', emb_dim)
         """
-        return self.speech2Token.encode(x)
+        x = x.unsqueeze(1) # [B, 1, T]
+        return self.codec.encode(x)[0].permute(0,2,1) # [B, T', emb_dim]
     
     def mamba(self, emb):
         """
         Args:
-            emb: the embedding produced by the encode process (B, T', emb_dim)
+            emb: the embedding produced by the encode process (B, T, emb_dim)
         Returns:
             - the embedding after mamba layers (B, T', emb_dim)
         """
-        return self.mambaModel(emb)
+        # emb = emb.permute(0, 2, 1) # [B， T‘， emb_dim]
+        return self.mambaModel(emb) # [B, T', emb_dim]
 
     def decode(self, emb):
         """
         Args:
-            emb: the embedding to be decoded
+            emb: the embedding to be decoded [B, T',emb_dim]
         Returns:
             - the reconstructed wav (B,   T'') (the wav might be a bit longer than the original one)
         """
-        return self.speech2Token.decode_emb(emb).squeeze(1)
+        emb = emb.permute(0, 2, 1) # [B, emb_dim, T']
+        return self.codec.decode(emb).squeeze(1)
     
     @torch.no_grad()
     def inference(self, mix, clean):
@@ -72,13 +70,14 @@ class MambaCodec(nn.Module):
         inference mix and the clean (T)
         return output and clean [T']
         """
-        true_emb = self.encode(clean)
-        true_audio = self.decode(true_emb)
+        raise NotImplementedError("not implemented")
+        # true_emb = self.encode(clean)
+        # true_audio = self.decode(true_emb)
 
-        input_emb = self.encode(mix)
-        output_y = self.mamba(input_emb)
-        output_audio = self.decode(output_y)
-        return output_audio, true_audio
+        # input_emb = self.encode(mix)
+        # output_y = self.mamba(input_emb)
+        # output_audio = self.decode(output_y)
+        # return output_audio, true_audio
 
     pass
 
