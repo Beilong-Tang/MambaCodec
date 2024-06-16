@@ -34,9 +34,9 @@ torch.backends.cudnn.benchmark = False
 torch.cuda.manual_seed_all(SEED)
 
 ## ddp process
-def setup(rank, world_size):
+def setup(rank, world_size, port_number):
     os.environ['MASTER_ADDR'] = '127.0.0.1'
-    os.environ['MASTER_PORT'] = '12355'
+    os.environ['MASTER_PORT'] = str(port_number)
 
     # initialize the process group
     dist.init_process_group("gloo", rank=rank, world_size=world_size)
@@ -57,7 +57,7 @@ def main(rank, world_size, args):
     if rank ==0:
         logger.info(' '.join(sys.argv))
 
-    setup(rank,world_size)
+    setup(rank,world_size, args.port)
     # Set the CUDA device based on local_rank
     device = rank
     torch.cuda.set_device(rank)
@@ -92,6 +92,7 @@ if __name__ =="__main__":
     parser.add_argument("--device", type = str, default = "cuda:5")
     parser.add_argument("--name", type = str, required = True)
     parser.add_argument("--ckpt_path", type = str, required = True)
+    parser.add_argument("--port", type = int, default = 12355)
     args = parser.parse_args()
     ###
 

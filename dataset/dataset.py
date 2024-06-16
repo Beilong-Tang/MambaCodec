@@ -93,9 +93,8 @@ class LibriMixDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.mode == "noise":
-            noise_audio, _ = torchaudio.load(self.noise[idx])
+            mix_audio, _ = torchaudio.load(self.mix[idx])
             clean_audio, _ = torchaudio.load(self.source[idx])
-            mix_audio = noise_audio + clean_audio
             mix_audio = rearrange(mix_audio, "1 t -> t")
             clean_audio = rearrange(clean_audio, "1 t -> t")
             mix_audio, clean_audio = clip_wav(mix_audio, clean_audio, self.length)

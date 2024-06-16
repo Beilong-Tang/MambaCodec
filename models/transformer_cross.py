@@ -3,6 +3,8 @@ import torch
 import sys 
 import logging 
 from einops import rearrange
+import dac
+from audiotools import AudioSignal
 logger = logging.getLogger(__name__)
 
 ### add funcodec path
@@ -21,8 +23,8 @@ class TransformerCross(nn.Module):
                 d_conv,
                 expand,
                 mamba_num,
-                emb_dim = 128, ### Not sure about it yet
-                device = "cpu", 
+                emb_dim = 1024, ### Not sure about it yet
+                device = "cpu",
                 hidden_dim =1024,
                 nhead = 16, # number of attention
                 bypass_quantizer = False, 
@@ -31,41 +33,30 @@ class TransformerCross(nn.Module):
                 ):
         super().__init__()
         self.hidden_dim = hidden_dim
-        self.speech2Token = Speech2Token(config_path, model_path, device = device, bypass_quantizer =bypass_quantizer, sampling_rate = sampling_rate)
+        self.codec = dac.DAC.load(dac.utils.download(model_type="16khz")) # 12 code books
         self.device = device
         out_dim = 1024
-        self.emb_dim = 128
-        self.embedding_layers = nn.ModuleList([ nn.Embedding(out_dim, emb_dim).to(self.device) for _ in range(0,32)])
-        self.linear_layers = nn.ModuleList([ nn.Linear(emb_dim, hidden_dim) for _ in range(0,32) ])
-        # self.embed = nn.Embedding(out_dim, hidden_dim)
-        # self.linear = nn.Linear(hidden_dim, out_dim)
-        encoder_layer = nn.TransformerEncoderLayer(d_model= emb_dim, dim_feedforward = 512,  nhead=16, batch_first = True)
-        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
+        self.emb_dim = emb_dim
+        self.embedding_layers = nn.ModuleList([ nn.Embedding(out_dim, emb_dim).to(self.device) for _ in range(0,12)])
+        encoder_layer = nn.TransformerEncoderLayer(d_model= emb_dim, dim_feedforward = 2048,  nhead=16, batch_first = True)
+        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=2)
         self.softmax = nn.Softmax(dim = -1)
-        self.mambaModel =transformer_encoder.to(device)
-        self.weights = nn.Parameter(torch.randn(32))
-        for param in self.speech2Token.parameters():
+        self.mambaModel = transformer_encoder.to(device)
+        self.weights = nn.Parameter(torch.randn(12))
+        for param in self.codec.parameters():
             param.requires_grad = False
-        mamba_param_num = sum(p.numel() for p in self.mambaModel.parameters())
+        mamba_param_num = sum(p.numel() for p in self.parameters())
         logger.info(f"mamba parameters {mamba_param_num}")
-    
-    def encode(self, x):
-        """
-        Args:
-            x: input speech with shape (B, T)
-        Returns:
-            - indexes after encoding with shape (n_q, B, T)
-        """
-        return self.speech2Token.encode_index(x)
     
     def mamba(self, emb):
         """
         Args:
-            emb: the index produced by the encode process (n_q, B, T)
+            emb: the index produced by the encode process (B, n_q, T)
         Returns:
             - the possibility after mamba layers (B,n_q,T,K)
         """ 
-        n_q, B, T = emb.shape
+        B, n_q, T = emb.shape
+        emb = rearrange(emb, "b n t -> n b t") # [n_q, B, T]
         res = torch.zeros(n_q, B, T, self.emb_dim).to(self.device) ### [n_q, B, T, H]
         for i, layer in enumerate(self.embedding_layers):
             res[i] = layer(emb[i])
@@ -76,34 +67,33 @@ class TransformerCross(nn.Module):
         result = [   l(res)   for l in self.linear_layers ] ## [n_q, B, T, K]
         result = rearrange(result, "n b t h -> n b t h")
         result = rearrange(result, "n b t h -> b n t h")
-        # result = self.softmax(result) 
+        result = self.softmax(result) 
         return result # [B,n_q, T, K ]
 
-    def decode(self, emb):
-        """
-        Args:
-            emb: the index to be decoded (B, T, n_q)
+    def forward(self, x, encode = False, recon = False, sample_rate = 16000, skip_lm = False):
+        """ if encode is true, only use the encoder to produce indexes
+            x : audio signal with shape [B, T]
+            recon: if true, decode the signal as well, else, just return the code
+            if skip_lm, then just return the reconstructed audio
         Returns:
-            - the reconstructed wav (B, T'') (the wav might be a bit longer than the original one)
+            if encode, only return the codes index [B,n_q, T]
+            else
+                the possibility of output codes [B, n_q, T, K]
+                the reconstruced audio if recon is True
         """
-        return self.speech2Token.decode_index(emb).squeeze(1)
-
+        res = x.unsqueeze(1) # [B, 1, T']
+        audio_sig = AudioSignal(res, sample_rate )
+        compress_audio = self.codec.compress(audio_sig) # compressed_audio
+        codes = compress_audio.codes # [B, n_q, T]
+        res = self.mamba(res) # [B,n_q, T, H]
+        if encode:
+            return codes # [B, n_q, T]
+        if skip_lm:
+            return self.codec.decompress(compress_audio)
+        if not recon:
+            return res # AudioData(B,1,T)
+        else:
+            new_codes = torch.argmax(res, dim = -1 ) # [B, n_q, T]
+            compress_audio.codes = new_codes
+            return res, self.codec.decompress(compress_audio) # [B,n_q, T, K], AudioData(B, 1, T)
     pass
-
-class MambaBlocks(nn.Module):
-    def __init__(self, num, d_model, d_state, d_conv, expand):
-        super().__init__()
-        layers = []
-        for _ in range(num):
-            layers.append(Mamba(d_model=d_model, d_state = d_state, d_conv = d_conv, expand = expand))
-        self.blocks = nn.Sequential(*layers)
-    
-    def forward(self, x):
-        """
-        Args: input embedding with shape (B, T, E)
-        Outputs: output with shape (B, T, E)
-
-        """
-        return self.blocks(x)
-        pass
-

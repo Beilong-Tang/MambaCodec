@@ -124,8 +124,13 @@ def clip_audio(output_audio, true_audio):
     return output_audio, true_audio
 
 def pesq_fn(output, true, rate = 16000):
-    """[T]"""
+    """[B, T]"""
     res = pesq_batch(rate, true, output, 'wb')
+    for r in res:
+        if isinstance(r, float):
+            continue
+        else:
+            return -1
     return sum(res)/len(res)
 
 def stoi_batch_fn(output, true, rate = 16000, extended = False):

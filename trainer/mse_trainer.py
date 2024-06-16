@@ -6,7 +6,6 @@ import time
 from loss import pesq_fn, stoi_batch_fn
 from .abs_trainer import AbsTrainer
 import torch.distributed as dist
-logger = logging.getLogger(__name__)
 
 
 class MseTrainer(AbsTrainer):
@@ -57,7 +56,7 @@ class MseTrainer(AbsTrainer):
                 true_emb = self.model.encode(clean)
                 true_audio = self.model.decode(true_emb).detach().cpu().numpy()
                 mse_loss = loss_fn(output_y, true_emb).item()
-                pesq_total = pesq_fn(output_audio, true_audio)
+                pesq_total += pesq_fn(output_audio, true_audio)
                 stoi_total+= stoi_batch_fn(output_audio, true_audio)
                 mse_loss_total += mse_loss
         mse_loss_avg= mse_loss_total / len(cv_data)
