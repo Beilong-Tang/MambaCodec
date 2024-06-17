@@ -53,6 +53,11 @@ def main(rank, world_size, args):
     logging.basicConfig(format="%(asctime)s,%(name)s,%(levelname)s,%(message)s", 
                         datefmt= "%Y-%m-%d %H:%M:%S", filename = f"{log_dir}/{now}.log" , level= logging.INFO)
     logger = logging.getLogger(__name__)
+    console_handler = logging.StreamHandler()
+    formatter = logging.Formatter("%(asctime)s,%(name)s,%(levelname)s,%(message)s")
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
     print(f"rank {rank}")
     if rank ==0:
         logger.info(' '.join(sys.argv))

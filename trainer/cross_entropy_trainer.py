@@ -17,8 +17,6 @@ class CrossEntropyTrainer(AbsTrainer):
         total_loss = 0
         for batch, (mix_audio, clean_audio) in enumerate(tr_data):
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
-            
-            
             with torch.no_grad():
                 true_code = self.model(clean, encode = True) #[B,n_q,T]
             res = self.model(mix) # [B,n_q,T,K]   
@@ -32,8 +30,8 @@ class CrossEntropyTrainer(AbsTrainer):
             total_loss +=loss.item()
             if batch % self.log_interval == 0:
                 with torch.no_grad():
-                    true_audio = self.model(clean, skip_lm = True).audio_data.squeeze(1)#[B,T]
-                    output_audio, _ = self.model(mix).audio_data.squeeze(1) # [B,T]
+                    true_audio = self.model(clean, skip_lm = True).audio_data.squeeze(1).cpu().numpy()#[B,T]
+                    output_audio= self.model(mix, recon=True)[1].audio_data.squeeze(1).cpu().numpy() # [B,T]
                 pesq = pesq_fn(output_audio,true_audio)
                 stoi = stoi_batch_fn(output_audio, true_audio)
                 loss, current = loss.item(), (batch + 1) * len(mix_audio)
@@ -49,8 +47,8 @@ class CrossEntropyTrainer(AbsTrainer):
         for mix_audio, clean_audio in cv_data:
             mix, clean = mix_audio.to(self.device), clean_audio.to(self.device)
             with torch.no_grad():
-                true_audio = self.model(clean, skip_lm = True).audio_data.squeeze(1)#[B,T]
-                output_audio, _ = self.model(mix).audio_data.squeeze(1) # [B,T]
+                true_audio = self.model(clean, skip_lm = True).audio_data.squeeze(1).cpu().numpy()#[B,T]
+                output_audio = self.model(mix, recon=True)[1].audio_data.squeeze(1).cpu().numpy() # [B,T]
                 pesq_total += pesq_fn(output_audio, true_audio)
                 stoi_total += stoi_batch_fn(output_audio, true_audio)
         pesq_avg= pesq_total/ len(cv_data)

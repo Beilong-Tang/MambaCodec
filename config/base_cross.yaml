@@ -26,7 +26,7 @@ data:
     mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/Libri2Mix/wav16k/min/list/dev/mix.scp
     source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/Libri2Mix/wav16k/min/list/dev/s1.scp
 
-batch_size: 8 ## batch size per process
+batch_size: 4 ## batch size per process
 epoch: 100
 log_interval: 10 ## every 10 batches
 

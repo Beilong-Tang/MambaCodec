@@ -35,11 +35,12 @@ class TransformerCross(nn.Module):
         self.hidden_dim = hidden_dim
         self.codec = dac.DAC.load(dac.utils.download(model_type="16khz")) # 12 code books
         self.device = device
-        out_dim = 1024
+        out_dim = 256
         self.emb_dim = emb_dim
-        self.embedding_layers = nn.ModuleList([ nn.Embedding(out_dim, emb_dim).to(self.device) for _ in range(0,12)])
-        encoder_layer = nn.TransformerEncoderLayer(d_model= emb_dim, dim_feedforward = 2048,  nhead=16, batch_first = True)
-        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=2)
+        self.embedding_layers = nn.ModuleList([ nn.Embedding(1024, out_dim).to(self.device) for _ in range(0,12)])
+        self.linear_layers= nn.ModuleList([ nn.Linear(out_dim, emb_dim).to(self.device) for _ in range(0,12)])
+        encoder_layer = nn.TransformerEncoderLayer(d_model= out_dim, dim_feedforward = 2048,  nhead=16, batch_first = True)
+        transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=1)
         self.softmax = nn.Softmax(dim = -1)
         self.mambaModel = transformer_encoder.to(device)
         self.weights = nn.Parameter(torch.randn(12))
@@ -85,7 +86,7 @@ class TransformerCross(nn.Module):
         audio_sig = AudioSignal(res, sample_rate )
         compress_audio = self.codec.compress(audio_sig) # compressed_audio
         codes = compress_audio.codes # [B, n_q, T]
-        res = self.mamba(res) # [B,n_q, T, H]
+        res = self.mamba(codes) # [B,n_q, T, H]
         if encode:
             return codes # [B, n_q, T]
         if skip_lm:

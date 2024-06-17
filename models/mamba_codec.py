@@ -25,7 +25,6 @@ class MambaCodec(nn.Module):
         super().__init__()
         self.codec = dac.DAC.load(dac.utils.download(model_type="16khz")) # 12 code books
         encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=8, batch_first = True)
-        # transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12, d_model = 128)
         transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
         self.mambaModel = transformer_encoder.to(device)
         ## freeze model parameters
