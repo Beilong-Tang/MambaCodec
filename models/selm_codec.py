@@ -106,14 +106,14 @@ class SelmCodec(nn.Module):
         ## kmeans parameter
         self.kmeans_cluster = 300
         self.kmeans_iter = 10
-        self.across_batch = True
+        self.across_batch = False
         self.mambaModel = LanguageModel(emb_num=self.kmeans_cluster, emb_dim=512)
         self.conformer = Conformer(
             input_dim=emb_dim,
             num_heads=4,
             ffn_dim=256,
             num_layers=4,
-            depthwise_conv_kernel_size=3,
+            depthwise_conv_kernel_size=31,
         )
         self.register_buffer("lookup", None)
         for param in self.codec.parameters():
