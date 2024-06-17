@@ -15,18 +15,19 @@ model:
 data:
   name: LibriMix # have to be in [WHAM, or LibriMix ]
   type: noise # [noise, target]
-  length: 64000 # 4 second x 16000 sample rate
+  emb: true
+  length: 500 # [B, 1024, 500] # if emb is true, this stands for the length of the embedding 
   tr: 
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
-    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/train/all/s1.scp
+    mix: /DKUdata/tangbl/dac_codec/data/libri2mix/emb/list/train/mix.scp
+    source: /DKUdata/tangbl/dac_codec/data/libri2mix/emb/list/train/s1.scp
   cv:
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
-    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/test/s1.scp
+    mix: /DKUdata/tangbl/dac_codec/data/libri2mix/emb/list/test/mix.scp
+    source: /DKUdata/tangbl/dac_codec/data/libri2mix/emb/list/test/s1.scp
   tt:
-    mix: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
-    source: /Netdata/2021/zb/data/LibriMix/Libri2Mix/wav16k/min/lists/dev/s1.scp
+    mix: /DKUdata/tangbl/dac_codec/data/libri2mix/emb/list/dev/mix.scp
+    source: /DKUdata/tangbl/dac_codec/data/libri2mix/emb/list/dev/s1.scp
 
-batch_size: 8
+batch_size: 5
 epoch: 100
 log_interval: 10 ## every 10 batches
 
